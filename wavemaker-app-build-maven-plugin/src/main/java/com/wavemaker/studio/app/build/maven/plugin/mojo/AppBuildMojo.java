@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 WaveMaker, Inc.
+ * Copyright (C) 2016 WaveMaker, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,58 @@
  */
 package com.wavemaker.studio.app.build.maven.plugin.mojo;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
-import com.wavemaker.studio.app.build.page.min.PageMinFileGenerator;
-import com.wavemaker.studio.common.io.Folder;
+import com.wavemaker.studio.app.build.maven.plugin.handler.AppBuildHandler;
+import com.wavemaker.studio.app.build.maven.plugin.handler.PageMinFileGenerationHandler;
+import com.wavemaker.studio.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
 import com.wavemaker.studio.common.io.local.LocalFolder;
 
 /**
  * Created by saddhamp on 12/4/16.
  */
-@Mojo(name = "generate")
+@Mojo(name = "generate", defaultPhase = LifecyclePhase.PREPARE_PACKAGE)
 public class AppBuildMojo extends AbstractMojo {
 
-    @Parameter(defaultValue = "${basedir}", required = true)
-    private String basedir;
+    @Parameter(property = "basedir", required = true, readonly = true)
+    private String baseDirectory;
 
-    @Parameter(defaultValue = "/src/main/webapp/pages/")
-    private String pagesFolderPath;
+    @Parameter(property = "project.build.outputDirectory", required = true, readonly = true)
+    private String outputDirectory;
+
+    @Parameter(name="pages-directory", defaultValue = "src/main/webapp/pages/")
+    private String pagesDirectory;
+
+    @Parameter(name = "services-directory", defaultValue = "services")
+    private String servicesDirectory;
+
+    private List<AppBuildHandler> appBuildHandlers;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        generatePageMinFilesForProjectPages();
+        initializeHandlers();
+
+        for(AppBuildHandler appBuildHandler : appBuildHandlers){
+            appBuildHandler.handle();
+        }
     }
 
-    private void generatePageMinFilesForProjectPages() {
-        Folder pagesFolder = new LocalFolder(basedir+pagesFolderPath);
-        List<Folder> pageFolders = pagesFolder.list().folders().fetchAll();
-        PageMinFileGenerator pageMinFileGenerator = new PageMinFileGenerator(pageFolders);
-        pageMinFileGenerator.setForceOverwrite(true).generate();
+    private void initializeHandlers() {
+        if(appBuildHandlers == null) {
+            appBuildHandlers = new ArrayList<AppBuildHandler>();
+            appBuildHandlers.add(new PageMinFileGenerationHandler(new LocalFolder(baseDirectory+"/"+pagesDirectory)));
+            appBuildHandlers.add(new SwaggerDocGenerationHandler(new LocalFolder(baseDirectory+"/"+servicesDirectory), outputDirectory));
+        }
     }
 }
+

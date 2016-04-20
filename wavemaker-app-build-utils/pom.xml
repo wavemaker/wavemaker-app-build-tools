@@ -17,5 +17,19 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>wavemaker-studio-common-util</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.wavemaker</groupId>
+            <artifactId>wavemaker-apidocs-tools-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

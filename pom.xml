@@ -15,6 +15,7 @@
 
     <properties>
         <jdk.version>1.7</jdk.version>
+        <wavemaker-api-tools.version>1.1.0</wavemaker-api-tools.version>
     </properties>
 
     <dependencyManagement>
@@ -38,6 +39,16 @@
                 <groupId>${project.groupId}</groupId>
                 <artifactId>wavemaker-studio-common-util</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.wavemaker</groupId>
+                <artifactId>wavemaker-apidocs-tools-spring</artifactId>
+                <version>${wavemaker-api-tools.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.data</groupId>
+                <artifactId>spring-data-commons</artifactId>
+                <version>1.11.0.RELEASE</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -88,4 +99,68 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <repositories>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>Maven Repository Switchboard</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>spring-snapshot</id>
+            <name>Spring Portfolio Snapshot Repository</name>
+            <url>http://s3.amazonaws.com/maven.springframework.org/snapshot</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>java.net</id>
+            <url>http://download.java.net/maven/2</url>
+        </repository>
+        <repository>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>wavemaker-maven-repo</id>
+            <name>wavemaker-maven-repo</name>
+            <url>http://s3.amazonaws.com/maven.wavemaker.com/release</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <id>autoincrement-versions-maven-plugin</id>
+            <name>autoincrement-versions-maven-plugin</name>
+            <url>http://autoincrement-versions-maven-plugin.googlecode.com/svn/repo</url>
+        </pluginRepository>
+        <pluginRepository>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <id>central</id>
+            <name>Central Repository</name>
+            <url>http://repo.maven.apache.org/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
+
 </project>

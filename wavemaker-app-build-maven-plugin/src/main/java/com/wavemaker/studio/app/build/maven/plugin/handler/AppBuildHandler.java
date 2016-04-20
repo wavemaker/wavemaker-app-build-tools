@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2015 WaveMaker, Inc.
+ * Copyright (C) 2016 WaveMaker, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wavemaker.studio.app.build.constants;
+package com.wavemaker.studio.app.build.maven.plugin.handler;
 
 /**
- * Created by saddhamp on 15/4/16.
+ * Created by saddhamp on 21/4/16.
  */
-public class AppBuildConstants {
-    public static final String PAGE_MIN_FILE = "page.min.html";
+public interface AppBuildHandler {
+    void handle();
 }
