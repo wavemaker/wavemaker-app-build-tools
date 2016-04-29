@@ -19,32 +19,31 @@ import com.wavemaker.studio.common.util.WMFileUtils;
 public enum Page {
     CSS(
             "css",
-            "{Content}{LineBreak}",
-            "<style id=\"{Page}.css\">{LineBreak}",
-            "</style>{LineBreak}",
+            "{Content}",
+            "<style id=\"{PageName}.css\">",
+            "</style>",
             ""),
     JS(
             "js",
-            "{Content}{LineBreak}",
-            "<script id=\"{Page}.js\">{LineBreak}",
-            "</script>{LineBreak}",
+            "{Content}",
+            "<script id=\"{PageName}.js\">",
+            "</script>",
             ""),
     JSON(
             "variables.json",
-            "var _{Page}Page_Variables_ ={Content}{LineBreak}",
-            "<script id=\"{Page}.variables.json\">{LineBreak}",
-            "</script>{LineBreak}",
+            "var _{PageName}Page_Variables_ ={Content}",
+            "<script id=\"{PageName}.variables.json\">",
+            "</script>",
             "{}"),
     HTML(
             "html",
-            "{Content}{LineBreak}",
-            "<script id=\"{Page}.html\" type=\"text/ng-template\">{LineBreak}",
-            "</script>{LineBreak}",
+            "{Content}",
+            "<script id=\"{PageName}.html\" type=\"text/ng-template\">",
+            "</script>",
             "");
 
-    private static final Pattern PAGE_NAME_PATTERN = Pattern.compile("\\{Page\\}");
+    private static final Pattern PAGE_NAME_PATTERN = Pattern.compile("\\{PageName\\}");
     private static final Pattern CONTENT_PATTERN = Pattern.compile("\\{Content\\}");
-    private static final Pattern  LINE_BREAK_PATTERN = Pattern.compile("\\{LineBreak\\}");
 
     private String fileSuffix;
     private String contentTemplate;
@@ -60,22 +59,13 @@ public enum Page {
         this.defaultContent = defaultContent;
     }
 
-    public String getFileSuffix() {
-        return fileSuffix;
-    }
-
     public String getStartElement(String pageName) {
         String manipulateStartElement = PAGE_NAME_PATTERN.matcher(startElement).replaceAll(pageName);
-        manipulateStartElement = LINE_BREAK_PATTERN.matcher(manipulateStartElement).replaceAll(SystemUtils.getLineBreak());
         return manipulateStartElement;
     }
 
     public String getEndElement() {
-        return LINE_BREAK_PATTERN.matcher(endElement).replaceAll(SystemUtils.getLineBreak());
-    }
-
-    private String getDefaultContent(){
-        return defaultContent;
+        return endElement;
     }
 
     private String getPageFileName(String pageName){
@@ -83,30 +73,42 @@ public enum Page {
     }
 
     private String getTemplateContent(String pageName, String originalContent){
-        String contentLineBreak = StringUtils.isNotBlank(originalContent)?SystemUtils.getLineBreak():"";
+        String lineBreak = SystemUtils.getLineBreak();
 
-        String manipulatedContent = LINE_BREAK_PATTERN.matcher(contentTemplate).replaceAll(contentLineBreak);
-        manipulatedContent = PAGE_NAME_PATTERN.matcher(manipulatedContent).replaceAll(pageName);
+        String startElement = this.getStartElement(pageName);
+        startElement = startElement+lineBreak;
+
+        String manipulatedContent = PAGE_NAME_PATTERN.matcher(contentTemplate).replaceAll(pageName);
         manipulatedContent = CONTENT_PATTERN.matcher(manipulatedContent).replaceFirst(Matcher.quoteReplacement(originalContent));
-        manipulatedContent = this.getStartElement(pageName)+manipulatedContent+this.getEndElement();
+        manipulatedContent = StringUtils.isNotBlank(manipulatedContent)?manipulatedContent+lineBreak:manipulatedContent;
 
-        return manipulatedContent;
+        String endElement = this.getEndElement();
+        endElement = endElement+lineBreak;
+
+        String templateContent = startElement+manipulatedContent+endElement;
+        return templateContent;
     }
 
     public String constructTemplate(Folder pageFolder){
+        String templateContent = null;
+
         try {
             String pageName = pageFolder.getName();
             File templateFile = pageFolder.getFile(getPageFileName(pageName));
-            String templateContent = templateFile.exists() ? WMFileUtils.readFileToString(((LocalFile) templateFile).getLocalFile()) : "";
-            templateContent = StringUtils.isBlank(templateContent) ? getDefaultContent() : templateContent.trim();
-            return getTemplateContent(pageName, templateContent);
+
+            templateContent = templateFile.exists() ? WMFileUtils.readFileToString(((LocalFile) templateFile).getLocalFile()) : "";
+            templateContent = StringUtils.isBlank(templateContent) ? defaultContent : templateContent.trim();
+            templateContent = getTemplateContent(pageName, templateContent);
+
         } catch (IOException ioException){
             throw new WMRuntimeException("Failed to construct template for project page", ioException);
         }
+
+        return templateContent;
     }
 
     public static Page getPage(String pageName){
-        return (StringUtils.isNotBlank(pageName)? Page.valueOf(pageName.toUpperCase()):null);
+        return (StringUtils.isNotBlank(pageName) ? Page.valueOf(pageName.toUpperCase()) : null);
     }
 }
 

@@ -44,26 +44,24 @@ public class PageMinFileUpdator {
 
     public void update() {
         File pageMinFile = pageFolder.getFile(AppBuildConstants.PAGE_MIN_FILE);
-        String fileContent = pageMinFile.getContent().asString();
-        String extension = page.getFileSuffix();
+        String pageMinFileContent = pageMinFile.getContent().asString();
 
-        Page page = Page.getPage(extension);
         String pageName = pageFolder.getName();
         String startElement = page.getStartElement(pageName);
 
-        validatePageMinFile(fileContent, startElement);
+        validatePageMinFile(pageMinFileContent, startElement);
 
         String endElement = page.getEndElement();
-        String content = page.constructTemplate(pageFolder);
-        content = replacePageContent(fileContent, startElement, endElement, content);
-        pageMinFile.getContent().write(content.trim());
+        String pageContent = page.constructTemplate(pageFolder);
+        String newPageMinFileContent = replacePageContent(pageMinFileContent, startElement, endElement, pageContent.trim());
+        pageMinFile.getContent().write(newPageMinFileContent.trim());
     }
 
-    private static String replacePageContent(String fileContent, String startElement, String endElement, String newPageContent) {
+    private static String replacePageContent(String fileContent, String startElement, String endElement, String pageContent) {
         String pageRegex = RegexConstants.MULTILINE_FLAG+ Pattern.quote(startElement)+RegexConstants.FIRST_OCCURENCE_OF_ANY_CHARSEQUENCE+Pattern.quote(endElement);
         Pattern pageContentPattern = Pattern.compile(pageRegex);
-        newPageContent = pageContentPattern.matcher(fileContent).replaceFirst(Matcher.quoteReplacement(newPageContent));
-        return newPageContent;
+        String newPageMinFileContent = pageContentPattern.matcher(fileContent).replaceFirst(Matcher.quoteReplacement(pageContent));
+        return newPageMinFileContent;
     }
 
     private static void validatePageMinFile(String string, String subString) {
