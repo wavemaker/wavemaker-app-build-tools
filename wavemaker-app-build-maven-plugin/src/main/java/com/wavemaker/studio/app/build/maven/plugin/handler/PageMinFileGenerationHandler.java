@@ -18,6 +18,7 @@ package com.wavemaker.studio.app.build.maven.plugin.handler;
 import java.util.List;
 
 import com.wavemaker.studio.app.build.pages.PageMinFileGenerator;
+import com.wavemaker.studio.common.WMRuntimeException;
 import com.wavemaker.studio.common.io.Folder;
 
 /**
@@ -27,18 +28,17 @@ public class PageMinFileGenerationHandler implements AppBuildHandler {
     private Folder pagesFolder;
 
     public PageMinFileGenerationHandler(Folder pagesFolder){
+        if(pagesFolder == null || !pagesFolder.exists())
+            throw new WMRuntimeException("Pages folder is null or does not exist");
         this.pagesFolder = pagesFolder;
     }
 
     @Override
     public void handle() {
-
-        if(pagesFolder.exists()) {
-            List<Folder> pageFolders = pagesFolder.list().folders().fetchAll();
-            if (pageFolders.size() > 0){
-                PageMinFileGenerator pageMinFileGenerator = new PageMinFileGenerator(pageFolders);
-                pageMinFileGenerator.setForceOverwrite(true).generate();
-            }
+        List<Folder> pageFolders = pagesFolder.list().folders().fetchAll();
+        if (pageFolders.size() > 0){
+            PageMinFileGenerator pageMinFileGenerator = new PageMinFileGenerator(pageFolders);
+            pageMinFileGenerator.setForceOverwrite(true).generate();
         }
     }
 }

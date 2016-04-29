@@ -52,6 +52,11 @@ public class SwaggerDocGenerationHandler extends AbstractLogEnabled implements A
     private String classPath;
 
     public SwaggerDocGenerationHandler(Folder servicesFolder, String classPath) {
+        if(servicesFolder == null || !servicesFolder.exists())
+            throw new WMRuntimeException("Services folder is null or does not exist");
+        if(StringUtils.isBlank(classPath))
+            throw new WMRuntimeException("Class path is null or empty");
+
         objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         this.servicesFolder = servicesFolder;
@@ -62,12 +67,10 @@ public class SwaggerDocGenerationHandler extends AbstractLogEnabled implements A
     public void handle() {
         try {
             initializeUrlClassLoader();
-            if(servicesFolder.exists()){
-                List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
-                if(serviceFolders.size() > 0){
-                    for(Folder serviceFolder : serviceFolders){
-                        generateSwaggerDoc(serviceFolder);
-                    }
+            List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
+            if(serviceFolders.size() > 0){
+                for(Folder serviceFolder : serviceFolders){
+                    generateSwaggerDoc(serviceFolder);
                 }
             }
         } finally {
