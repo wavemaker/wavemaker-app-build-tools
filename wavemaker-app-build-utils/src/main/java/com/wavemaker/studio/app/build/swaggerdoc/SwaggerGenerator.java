@@ -20,10 +20,12 @@ import java.util.concurrent.Callable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.wavemaker.studio.common.WMRuntimeException;
 import com.wavemaker.studio.common.classloader.ResourceClassLoaderUtils;
 import com.wavemaker.tools.apidocs.tools.core.model.Info;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
@@ -46,6 +48,8 @@ public class SwaggerGenerator {
     private ClassLoader classLoader;
 
     public SwaggerGenerator(String basePackage){
+        if(StringUtils.isBlank(basePackage))
+            throw new WMRuntimeException("Base package is null or empty");
         this.basePackage = basePackage;
     }
 
