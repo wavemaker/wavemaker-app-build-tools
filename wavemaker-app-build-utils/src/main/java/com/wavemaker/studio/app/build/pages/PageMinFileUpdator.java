@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wavemaker.studio.app.build.page.min;
+package com.wavemaker.studio.app.build.pages;
 
-import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,10 +24,7 @@ import com.wavemaker.studio.app.build.constants.AppBuildConstants;
 import com.wavemaker.studio.common.WMRuntimeException;
 import com.wavemaker.studio.common.io.File;
 import com.wavemaker.studio.common.io.Folder;
-import com.wavemaker.studio.common.io.local.LocalFile;
 import com.wavemaker.studio.common.util.RegexConstants;
-import com.wavemaker.studio.common.util.WMFileUtils;
-import com.wavemaker.studio.common.util.WMUtils;
 
 /**
  * Created by saddhamp on 15/4/16.

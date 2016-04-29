@@ -17,7 +17,7 @@ package com.wavemaker.studio.app.build.maven.plugin.handler;
 
 import java.util.List;
 
-import com.wavemaker.studio.app.build.page.min.PageMinFileGenerator;
+import com.wavemaker.studio.app.build.pages.PageMinFileGenerator;
 import com.wavemaker.studio.common.io.Folder;
 
 /**

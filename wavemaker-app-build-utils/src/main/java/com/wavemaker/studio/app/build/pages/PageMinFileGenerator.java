@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.wavemaker.studio.app.build.page.min;
+package com.wavemaker.studio.app.build.pages;
 
 import java.util.List;
 

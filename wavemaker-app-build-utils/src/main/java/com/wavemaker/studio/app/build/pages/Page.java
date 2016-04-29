@@ -1,4 +1,4 @@
-package com.wavemaker.studio.app.build.page.min;
+package com.wavemaker.studio.app.build.pages;
 
 import java.io.IOException;
 import java.util.regex.Matcher;
