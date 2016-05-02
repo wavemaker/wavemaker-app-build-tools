@@ -17,7 +17,6 @@ package com.wavemaker.studio.app.build.maven.plugin.handler;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
@@ -49,24 +48,27 @@ public class SwaggerDocGenerationHandler extends AbstractLogEnabled implements A
     private ObjectMapper objectMapper;
     private Folder servicesFolder;
     private URLClassLoader urlClassLoader;
-    private String classPath;
+    private URL [] classPathURLs;
 
-    public SwaggerDocGenerationHandler(Folder servicesFolder, String classPath) {
-        if(servicesFolder == null || !servicesFolder.exists())
+    public SwaggerDocGenerationHandler(Folder servicesFolder, URL [] classPathURLs) {
+        if(servicesFolder == null || !servicesFolder.exists()) {
             throw new WMRuntimeException("Services folder is null or does not exist");
-        if(StringUtils.isBlank(classPath))
-            throw new WMRuntimeException("Class path is null or empty");
+        }
+        if(classPathURLs == null || classPathURLs.length == 0) {
+            throw new WMRuntimeException("No class path url provided");
+        }
 
         objectMapper = new ObjectMapper();
         objectMapper.configure(SerializationFeature.INDENT_OUTPUT, true);
         this.servicesFolder = servicesFolder;
-        this.classPath = classPath;
+        this.classPathURLs = classPathURLs;
     }
 
     @Override
     public void handle() {
         try {
-            initializeUrlClassLoader();
+            urlClassLoader = new URLClassLoader(classPathURLs, Thread.currentThread().getContextClassLoader());
+
             List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
             if(serviceFolders.size() > 0){
                 for(Folder serviceFolder : serviceFolders){
@@ -95,19 +97,6 @@ public class SwaggerDocGenerationHandler extends AbstractLogEnabled implements A
         }
 
         return logger;
-    }
-
-    protected void initializeUrlClassLoader() {
-        java.io.File classDir = new java.io.File(classPath);
-
-        URL[] urls;
-        try {
-            urls = new URL[]{ classDir.toURI().toURL() };
-        } catch (MalformedURLException e) {
-            throw new WMRuntimeException("Failed to initialize url class loader", e);
-        }
-
-        urlClassLoader = new URLClassLoader(urls, Thread.currentThread().getContextClassLoader());
     }
 
     protected void generateSwaggerDoc(Folder serviceFolder) {
