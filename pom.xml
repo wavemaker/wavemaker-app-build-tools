@@ -15,7 +15,7 @@
 
     <properties>
         <jdk.version>1.7</jdk.version>
-        <wavemaker-api-tools.version>1.1.0</wavemaker-api-tools.version>
+        <wavemaker-api-tools.version>2.0</wavemaker-api-tools.version>
     </properties>
 
     <dependencyManagement>
@@ -41,8 +41,8 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.wavemaker</groupId>
-                <artifactId>wavemaker-apidocs-tools-spring</artifactId>
+                <groupId>com.wavemaker.tools.apidocs</groupId>
+                <artifactId>wavemaker-tools-apidocs-spring</artifactId>
                 <version>${wavemaker-api-tools.version}</version>
             </dependency>
             <dependency>

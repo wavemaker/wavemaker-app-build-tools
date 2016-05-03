@@ -18,8 +18,8 @@
             <artifactId>wavemaker-studio-common-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.wavemaker</groupId>
-            <artifactId>wavemaker-apidocs-tools-spring</artifactId>
+            <groupId>com.wavemaker.tools.apidocs</groupId>
+            <artifactId>wavemaker-tools-apidocs-spring</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
