@@ -32,6 +32,7 @@ import org.apache.maven.project.MavenProject;
 import com.wavemaker.studio.app.build.maven.plugin.handler.AppBuildHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.PageMinFileGenerationHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
+import com.wavemaker.studio.app.build.maven.plugin.handler.VariableServiceDefGenerationHandler;
 import com.wavemaker.studio.common.io.Folder;
 import com.wavemaker.studio.common.io.local.LocalFolder;
 
@@ -52,6 +53,9 @@ public class AppBuildMojo extends AbstractMojo {
 
     @Parameter(name = "services-directory", defaultValue = "services")
     private String servicesDirectory;
+
+    @Parameter(name = "outputDirectory", defaultValue = "target/classes")
+    private String outputDirectory;
 
     private List<AppBuildHandler> appBuildHandlers;
 
@@ -74,10 +78,13 @@ public class AppBuildMojo extends AbstractMojo {
                 appBuildHandlers.add(new PageMinFileGenerationHandler(pagesFolder));
             }
 
+
             Folder servicesFolder = rootFolder.getFolder(servicesDirectory);
             if (servicesFolder.exists()) {
+                Folder targetClassesFolder = rootFolder.getFolder(outputDirectory);
                 URL [] runtimeClasspathElements = getRuntimeClasspathElements();
                 appBuildHandlers.add(new SwaggerDocGenerationHandler(servicesFolder, runtimeClasspathElements));
+                appBuildHandlers.add(new VariableServiceDefGenerationHandler(servicesFolder,targetClassesFolder));
             }
         }
     }
