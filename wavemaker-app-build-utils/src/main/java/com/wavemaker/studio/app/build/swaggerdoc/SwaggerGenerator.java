@@ -15,8 +15,6 @@
  */
 package com.wavemaker.studio.app.build.swaggerdoc;
 
-import java.util.concurrent.Callable;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,6 +25,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.wavemaker.studio.common.WMRuntimeException;
 import com.wavemaker.studio.common.classloader.ResourceClassLoaderUtils;
+import com.wavemaker.studio.common.classloader.WMCallable;
 import com.wavemaker.tools.apidocs.tools.core.model.Info;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 import com.wavemaker.tools.apidocs.tools.parser.config.SwaggerConfiguration;
@@ -86,9 +85,9 @@ public class SwaggerGenerator {
             builder.setInfo(new Info());
         }
 
-        swagger = ResourceClassLoaderUtils.runInClassLoaderContext(new Callable<Swagger>() {
+        swagger = ResourceClassLoaderUtils.runInClassLoaderContext(new WMCallable<Swagger>() {
             @Override
-            public Swagger call() throws Exception {
+            public Swagger call() {
                 builder.addParameterResolver(Pageable.class, new PageParameterResolver());
                 builder.addParameterResolver(MultipartFile.class, new MultiPartFileResolver());
                 builder.addParameterResolver(MultipartHttpServletRequest.class, new MultiPartRequestResolver());
