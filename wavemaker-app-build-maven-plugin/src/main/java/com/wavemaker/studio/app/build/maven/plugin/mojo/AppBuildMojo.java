@@ -81,10 +81,9 @@ public class AppBuildMojo extends AbstractMojo {
 
             Folder servicesFolder = rootFolder.getFolder(servicesDirectory);
             if (servicesFolder.exists()) {
-                Folder targetClassesFolder = rootFolder.getFolder(outputDirectory);
                 URL [] runtimeClasspathElements = getRuntimeClasspathElements();
                 appBuildHandlers.add(new SwaggerDocGenerationHandler(servicesFolder, runtimeClasspathElements));
-                appBuildHandlers.add(new VariableServiceDefGenerationHandler(servicesFolder,targetClassesFolder));
+                appBuildHandlers.add(new VariableServiceDefGenerationHandler(rootFolder));
             }
         }
     }
