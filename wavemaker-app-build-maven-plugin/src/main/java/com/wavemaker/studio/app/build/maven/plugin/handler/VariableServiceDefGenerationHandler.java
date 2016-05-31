@@ -46,7 +46,7 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
 
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
     private Map<String, Future<Map<String, ServiceDefinition>>> serviceVsServiceDefs = new HashMap<>();
-    private Map<String, Map<String, ServiceDefinition>> filteredServiceVsServiceDefs = new ConcurrentHashMap<>();
+    private Map<String, Map<String, ServiceDefinition>> filteredServiceDefinitions = new ConcurrentHashMap<>();
 
     public VariableServiceDefGenerationHandler(Folder rootFolder) {
         this.rootFolder = rootFolder;
@@ -66,7 +66,7 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
     }
 
 
-    private Map<String, Future<Map<String, ServiceDefinition>>> buildServiceDefsForAllServices(final Folder servicesFolder) {
+    private void buildServiceDefsForAllServices(final Folder servicesFolder) {
         if (servicesFolder.exists()) {
             List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
             if (serviceFolders.size() > 0) {
@@ -79,8 +79,10 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
                     }));
                 }
             }
+            for (String service : serviceVsServiceDefs.keySet()) {
+                handleFutureIfException(serviceVsServiceDefs.get(service));
+            }
         }
-        return serviceVsServiceDefs;
     }
 
     private Map<String, ServiceDefinition> buildServiceDefs(final Folder serviceFolder) {
@@ -99,36 +101,55 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
 
     }
 
+
     private void generateServiceDefs() {
         Resources<File> files = rootFolder.find().files().exclude(FilterOn.antPattern("/app/prefabs/**")).include(FilterOn.names().ending(".variables.json"));
         Collection<Callable> callables = new ArrayList<>();
         Collection<Future> futures = new ArrayList<>();
-        for (final File file : files) {
-            callables.add(new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    try {
-                        generateServiceDefs(file);
-                    } catch (JSONException e) {
-                        getLogger().error("Failed to build service definitions for variable json file " + file.getName());
-                    }
-                    return this;
-                }
-            });
-        }
         try {
+            for (final File file : files) {
+                callables.add(new Callable<Object>() {
+                    @Override
+                    public Object call() throws Exception {
+                        try {
+                            generateServiceDefs(file);
+                        } catch (JSONException e) {
+                            getLogger().error("Failed to build service definitions for variable json file " + file.getName());
+                        }
+                        return this;
+                    }
+                });
+            }
             for (Callable callable : callables) {
                 futures.add(executorService.submit(callable));
             }
             for (Future<Object> future : futures) {
-                future.get();
+                handleFutureIfException(future);
             }
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+        } finally {
+            executorService.shutdown();
         }
     }
 
-    private void generateServiceDefs(final File file) throws JSONException {
+    private <V> V handleFutureIfException(Future<V> future) {
+        Throwable t = null;
+        V v = null;
+        try {
+            v = future.get();
+        } catch (CancellationException ce) {
+            t = ce;
+        } catch (ExecutionException ee) {
+            t = ee;
+        } catch (InterruptedException e) {
+            t = e;
+        }
+        if (t != null) {
+            throw new WMRuntimeException(t);
+        }
+        return v;
+    }
+
+    private void generateServiceDefs(final File file) throws JSONException, ExecutionException, InterruptedException {
         String s = file.getContent().asString();
         if (StringUtils.isBlank(s)) {
             return;
@@ -139,48 +160,40 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
             String key = (String) keys.next();
             JSONObject o = (JSONObject) jsonObject.get(key);
             if (o.has("category") && o.getString("category").equals(WM_SERVICE_VARIABLE)) {
-                validateServiceVariable(key, o);
+                if (!o.has("operationId")) {
+                    getLogger().warn("Service variable " + key + " does not have operation id ");
+                    continue;
+                }
+                if (!o.has("service")) {
+                    getLogger().warn("Service variable " + key + " does not have service name property ");
+                    continue;
+                }
                 String operationId = o.getString("operationId");
                 String service = o.getString("service");
-                if (!serviceVsServiceDefs.containsKey(service)) {
-                    getLogger().error("Service does not exist for the service variable" + key);
+                if (serviceVsServiceDefs.get(service) == null) {
+                    getLogger().warn("Service " + service + " does not exist for the service variable" + key);
+                    continue;
                 }
-                try {
-                    synchronized (filteredServiceVsServiceDefs) {
-                        if (!filteredServiceVsServiceDefs.containsKey(service)) {
-                            filteredServiceVsServiceDefs.put(service, new ConcurrentHashMap<String, ServiceDefinition>());
-                        }
+                synchronized (filteredServiceDefinitions) {
+                    if (!filteredServiceDefinitions.containsKey(service)) {
+                        filteredServiceDefinitions.put(service, new ConcurrentHashMap<String, ServiceDefinition>());
                     }
-                    ServiceDefinition serviceDefinition = serviceVsServiceDefs.get(service).get().get(operationId);
-                    Map<String, ServiceDefinition> serviceDefinitionMap = filteredServiceVsServiceDefs.get(service);
+                }
+                final Map<String, ServiceDefinition> serviceDefinitions = serviceVsServiceDefs.get(service).get();
+                if(serviceDefinitions.containsKey(operationId)) {
+                    ServiceDefinition serviceDefinition = serviceDefinitions.get(operationId);
+                    Map<String, ServiceDefinition> serviceDefinitionMap = filteredServiceDefinitions.get(service);
                     serviceDefinitionMap.put(operationId, serviceDefinition);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
                 }
             }
         }
     }
 
-    private void validateServiceVariable(final String key, final JSONObject o) {
-        if (!o.has("operationId")) {
-            getLogger().error("Service variable " + key + " does not have operation id ");
-        }
-        if (!o.has("service")) {
-            getLogger().error("Service variable " + key + " does not have service name property ");
-        }
-    }
 
     private void persistServiceDefs() {
-        for (final String service : filteredServiceVsServiceDefs.keySet()) {
-            if (filteredServiceVsServiceDefs.get(service).size() > 0) {
-                executorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        persistServiceDefs(service, filteredServiceVsServiceDefs.get(service));
-                    }
-                });
+        for (final String service : filteredServiceDefinitions.keySet()) {
+            if (filteredServiceDefinitions.get(service).size() > 0) {
+                persistServiceDefs(service, filteredServiceDefinitions.get(service));
             }
         }
     }
