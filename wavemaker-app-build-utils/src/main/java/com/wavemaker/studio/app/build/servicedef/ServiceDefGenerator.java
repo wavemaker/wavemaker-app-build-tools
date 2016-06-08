@@ -31,25 +31,27 @@ public class ServiceDefGenerator {
      */
     public Map<String, ServiceDefinition> generate() {
         Map<String, ServiceDefinition> serviceDefs = new HashMap<>();
-        for (Map.Entry entry : swagger.getPaths().entrySet()) {
-            Path path = (Path) entry.getValue();
-            for (Operation operation : path.getOperations())
-                if (operation != null) {
+        if(swagger.getPaths() != null) {
+            for (Map.Entry entry : swagger.getPaths().entrySet()) {
+                Path path = (Path) entry.getValue();
+                for (Operation operation : path.getOperations())
+                    if (operation != null) {
 
-                    final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
-                    final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                    final String relativePath = path.getBasePath() + path.getRelativePath();
-                    final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
+                        final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
+                        final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
+                        final String relativePath = path.getBasePath() + path.getRelativePath();
+                        final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
 
 
-                    serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
-                            .addId(operation.getOperationId())
-                            .addController(operation.getTags().get(0))
-                            .addType(operationType)
-                            .addOperationType(operationType)
-                            .addService(swagger.getInfo().getServiceId())
-                            .addWmServiceOperationInfo(operationInfo));
-                }
+                        serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
+                                .addId(operation.getOperationId())
+                                .addController(operation.getTags().get(0))
+                                .addType(operationType)
+                                .addOperationType(operationType)
+                                .addService(swagger.getInfo().getServiceId())
+                                .addWmServiceOperationInfo(operationInfo));
+                    }
+            }
         }
         return serviceDefs;
     }
