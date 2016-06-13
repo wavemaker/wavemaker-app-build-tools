@@ -22,9 +22,8 @@ import java.net.URLClassLoader;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -40,7 +39,9 @@ import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 /**
  * Created by saddhamp on 20/4/16.
  */
-public class SwaggerDocGenerationHandler extends AbstractLogEnabled implements AppBuildHandler {
+public class SwaggerDocGenerationHandler implements AppBuildHandler {
+    private static final Logger logger = LoggerFactory.getLogger(SwaggerDocGenerationHandler.class);
+
     private static final String DESIGN_TIME_FOLDER = "designtime";
     private static final String SRC_FOLDER = "src";
     private static final String API_EXTENSION = "_API.json";
@@ -80,23 +81,10 @@ public class SwaggerDocGenerationHandler extends AbstractLogEnabled implements A
                 try {
                     urlClassLoader.close();
                 } catch (IOException e) {
-                    getLogger().warn("Failed to close classloader");
+                    logger.warn("Failed to close classloader");
                 }
             }
         }
-    }
-
-    @Override
-    protected Logger getLogger() {
-        Logger logger = super.getLogger();
-
-        if (logger == null) {
-            logger = new ConsoleLogger(Logger.LEVEL_INFO, "swagger-doc-generation-handler");
-
-            enableLogging(logger);
-        }
-
-        return logger;
     }
 
     protected void generateSwaggerDoc(Folder serviceFolder) {

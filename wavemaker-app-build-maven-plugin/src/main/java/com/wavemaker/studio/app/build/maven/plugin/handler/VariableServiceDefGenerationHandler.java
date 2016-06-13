@@ -3,15 +3,25 @@ package com.wavemaker.studio.app.build.maven.plugin.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.codehaus.plexus.logging.Logger;
-import org.codehaus.plexus.logging.console.ConsoleLogger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.wavemaker.studio.app.build.servicedef.ServiceDefGenerator;
 import com.wavemaker.studio.common.WMRuntimeException;
@@ -28,10 +38,11 @@ import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
  * @author <a href="mailto:sunil.pulugula@wavemaker.com">Sunil Kumar</a>
  * @since 29/4/16
  */
-public class VariableServiceDefGenerationHandler extends AbstractLogEnabled implements AppBuildHandler {
+public class VariableServiceDefGenerationHandler implements AppBuildHandler {
+    private static final Logger logger = LoggerFactory.getLogger(VariableServiceDefGenerationHandler.class);
 
-    public static final String SERVICE_DEFS = "servicedefs";
-    public static final String WM_SERVICE_VARIABLE = "wm.ServiceVariable";
+    private static final String SERVICE_DEFS = "servicedefs";
+    private static final String WM_SERVICE_VARIABLE = "wm.ServiceVariable";
     private static final String DESIGN_TIME_FOLDER = "designtime";
     private static final String API_EXTENSION = "_API.json";
     private static final String REST_SERVICE_API_EXTENSION = "_API_REST_SERVICE.json";
@@ -95,7 +106,7 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
         } else if (restSwaggerFile.exists()) {
             swagger = unmarshallSwagger(restSwaggerFile);
         } else {
-            getLogger().error("Swagger api documentation swaggerFile does not exist for service " + serviceFolder.getName());
+            logger.error("Swagger api documentation swaggerFile does not exist for service " + serviceFolder.getName());
         }
         return swagger != null ? new ServiceDefGenerator(swagger).generate() : new HashMap<String, ServiceDefinition>();
 
@@ -114,7 +125,7 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
                         try {
                             generateServiceDefs(file);
                         } catch (JSONException e) {
-                            getLogger().error("Failed to build service definitions for variable json file " + file.getName());
+                            logger.error("Failed to build service definitions for variable json file " + file.getName());
                         }
                         return this;
                     }
@@ -161,17 +172,17 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
             JSONObject o = (JSONObject) jsonObject.get(key);
             if (o.has("category") && o.getString("category").equals(WM_SERVICE_VARIABLE)) {
                 if (!o.has("operationId")) {
-                    getLogger().warn("Service variable " + key + " does not have operation id ");
+                    logger.warn("Service variable " + key + " does not have operation id ");
                     continue;
                 }
                 if (!o.has("service")) {
-                    getLogger().warn("Service variable " + key + " does not have service name property ");
+                    logger.warn("Service variable " + key + " does not have service name property ");
                     continue;
                 }
                 String operationId = o.getString("operationId");
                 String service = o.getString("service");
                 if (serviceVsServiceDefs.get(service) == null) {
-                    getLogger().warn("Service " + service + " does not exist for the service variable" + key);
+                    logger.warn("Service " + service + " does not exist for the service variable" + key);
                     continue;
                 }
                 synchronized (filteredServiceDefinitions) {
@@ -217,16 +228,6 @@ public class VariableServiceDefGenerationHandler extends AbstractLogEnabled impl
             file.createIfMissing();
         }
         return file;
-    }
-
-    @Override
-    protected Logger getLogger() {
-        Logger logger = super.getLogger();
-        if (logger == null) {
-            logger = new ConsoleLogger(Logger.LEVEL_INFO, "service-def-generation-handler");
-            enableLogging(logger);
-        }
-        return logger;
     }
 
     protected Swagger unmarshallSwagger(File file) {
