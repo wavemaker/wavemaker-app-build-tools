@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.wavemaker.studio.app.build.servicedef.ServiceDefGenerator;
+import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.studio.common.WMRuntimeException;
 import com.wavemaker.studio.common.io.File;
 import com.wavemaker.studio.common.io.FilterOn;
@@ -108,7 +109,11 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         } else {
             logger.error("Swagger api documentation swaggerFile does not exist for service " + serviceFolder.getName());
         }
-        return swagger != null ? new ServiceDefGenerator(swagger).generate() : new HashMap<String, ServiceDefinition>();
+        try {
+            return swagger != null ? new ServiceDefGenerator(swagger).generate() : new HashMap<String, ServiceDefinition>();
+        } catch (ServiceDefGenerationException e) {
+            throw new WMRuntimeException("Failed to build service def for service " + swagger.getInfo().getServiceId(), e);
+        }
 
     }
 
@@ -191,7 +196,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
                     }
                 }
                 final Map<String, ServiceDefinition> serviceDefinitions = serviceVsServiceDefs.get(service).get();
-                if(serviceDefinitions.containsKey(operationId)) {
+                if (serviceDefinitions.containsKey(operationId)) {
                     ServiceDefinition serviceDefinition = serviceDefinitions.get(operationId);
                     Map<String, ServiceDefinition> serviceDefinitionMap = filteredServiceDefinitions.get(service);
                     serviceDefinitionMap.put(operationId, serviceDefinition);

@@ -1,8 +1,12 @@
 package com.wavemaker.studio.app.build.servicedef;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.wavemaker.studio.common.OperationNotExistException;
+import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.studio.common.servicedef.model.Parameter;
 import com.wavemaker.studio.common.servicedef.model.ServiceDefinition;
 import com.wavemaker.studio.common.servicedef.model.WMServiceOperationInfo;
@@ -29,28 +33,32 @@ public class ServiceDefGenerator {
     /**
      * Generates service definitions for all operation from swagger.
      */
-    public Map<String, ServiceDefinition> generate() {
+    public Map<String, ServiceDefinition> generate() throws ServiceDefGenerationException {
         Map<String, ServiceDefinition> serviceDefs = new HashMap<>();
-        if(swagger.getPaths() != null) {
-            for (Map.Entry entry : swagger.getPaths().entrySet()) {
-                Path path = (Path) entry.getValue();
-                for (Operation operation : path.getOperations())
-                    if (operation != null) {
+        if (swagger.getPaths() != null) {
+            try {
+                for (Map.Entry entry : swagger.getPaths().entrySet()) {
+                    Path path = (Path) entry.getValue();
+                    for (Operation operation : path.getOperations())
+                        if (operation != null) {
 
-                        final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
-                        final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                        final String relativePath = path.getBasePath() + path.getRelativePath();
-                        final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
+                            final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
+                            final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
+                            final String relativePath = path.getBasePath() + path.getRelativePath();
+                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
 
 
-                        serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
-                                .addId(operation.getOperationId())
-                                .addController(operation.getTags().get(0))
-                                .addType(operationType)
-                                .addOperationType(operationType)
-                                .addService(swagger.getInfo().getServiceId())
-                                .addWmServiceOperationInfo(operationInfo));
-                    }
+                            serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
+                                    .addId(operation.getOperationId())
+                                    .addController(operation.getTags().get(0))
+                                    .addType(operationType)
+                                    .addOperationType(operationType)
+                                    .addService(swagger.getInfo().getServiceId())
+                                    .addWmServiceOperationInfo(operationInfo));
+                        }
+                }
+            } catch (Exception e) {
+                throw new ServiceDefGenerationException(e);
             }
         }
         return serviceDefs;
@@ -63,27 +71,31 @@ public class ServiceDefGenerator {
      * @return service definition for given operation Id.
      * @throws OperationNotExistException when operationId does not exist in the swagger object.
      */
-    public ServiceDefinition generate(String operationId) throws OperationNotExistException {
-        for (Map.Entry entry : swagger.getPaths().entrySet()) {
-            Path path = (Path) entry.getValue();
-            for (Operation operation : path.getOperations())
-                if (operation != null) {
-                    if (operation.getOperationId().equals(operationId)) {
-                        final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
-                        final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                        final String relativePath = path.getBasePath() + path.getRelativePath();
-                        final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
+    public ServiceDefinition generate(String operationId) throws OperationNotExistException,ServiceDefGenerationException {
+        try {
+            for (Map.Entry entry : swagger.getPaths().entrySet()) {
+                Path path = (Path) entry.getValue();
+                for (Operation operation : path.getOperations())
+                    if (operation != null) {
+                        if (operation.getOperationId().equals(operationId)) {
+                            final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
+                            final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
+                            final String relativePath = path.getBasePath() + path.getRelativePath();
+                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
 
 
-                        return new ServiceDefinition().getNewInstance()
-                                .addId(operation.getOperationId())
-                                .addController(operation.getTags().get(0))
-                                .addType(operationType)
-                                .addOperationType(operationType)
-                                .addService(swagger.getInfo().getServiceId())
-                                .addWmServiceOperationInfo(operationInfo);
+                            return new ServiceDefinition().getNewInstance()
+                                    .addId(operation.getOperationId())
+                                    .addController(operation.getTags().get(0))
+                                    .addType(operationType)
+                                    .addOperationType(operationType)
+                                    .addService(swagger.getInfo().getServiceId())
+                                    .addWmServiceOperationInfo(operationInfo);
+                        }
                     }
-                }
+            }
+        } catch (Exception e) {
+            throw new ServiceDefGenerationException(e);
         }
         throw new OperationNotExistException("Operation Id " + operationId + " does not exist in service " + swagger.getInfo().getServiceId());
     }
