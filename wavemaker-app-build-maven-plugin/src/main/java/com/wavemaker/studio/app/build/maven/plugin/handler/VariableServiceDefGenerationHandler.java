@@ -101,10 +101,10 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         File swaggerFile = designFolder.getFile(designFolder.getParent().getName() + API_EXTENSION);
         File restSwaggerFile = designFolder.getFile(designFolder.getParent().getName() + REST_SERVICE_API_EXTENSION);
         Swagger swagger = null;
-        if (swaggerFile.exists()) {
-            swagger = unmarshallSwagger(swaggerFile);
-        } else if (restSwaggerFile.exists()) {
+        if (restSwaggerFile.exists()) {
             swagger = unmarshallSwagger(restSwaggerFile);
+        } else if (swaggerFile.exists()) {
+            swagger = unmarshallSwagger(swaggerFile);
         } else {
             logger.error("Swagger api documentation swaggerFile does not exist for service " + serviceFolder.getName());
         }
