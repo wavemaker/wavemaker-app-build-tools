@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.wavemaker.studio.common.OperationNotExistException;
 import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.studio.common.servicedef.model.Parameter;
@@ -44,8 +46,8 @@ public class ServiceDefGenerator {
 
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                            final String relativePath = path.getBasePath() + path.getRelativePath();
-                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
+                            final String serviceOperationPath = getServiceOperationPath(swagger, path);
+                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, serviceOperationPath);
 
 
                             serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
@@ -80,8 +82,8 @@ public class ServiceDefGenerator {
                         if (operation.getOperationId().equals(operationId)) {
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                            final String relativePath = path.getBasePath() + path.getRelativePath();
-                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, relativePath);
+                            final String serviceOperationPath = getServiceOperationPath(swagger, path);
+                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, serviceOperationPath);
 
 
                             return new ServiceDefinition().getNewInstance()
@@ -101,13 +103,13 @@ public class ServiceDefGenerator {
     }
 
 
-    private WMServiceOperationInfo buildWMServiceOperationInfo(final Swagger swagger, final Operation operation, final String httpMethod, final String relativePath) {
+    private WMServiceOperationInfo buildWMServiceOperationInfo(final Swagger swagger, final Operation operation, final String httpMethod, final String path) {
         List<Parameter> parameters = buildParameters(swagger, operation);
 
         return WMServiceOperationInfo.getNewInstance()
                 .addName(operation.getMethodName())
                 .addHttpMethod(httpMethod)
-                .addRelativePath(relativePath)
+                .addPath(path)
                 .addConsumes(operation.getConsumes())
                 .addProduces(operation.getProduces())
                 .addMethodType(httpMethod)
@@ -153,6 +155,17 @@ public class ServiceDefGenerator {
                 }
 
             }
+        }
+    }
+
+    private String getServiceOperationPath(Swagger swagger, Path path) {
+        String host = swagger.getHost();
+        String basePath = swagger.getBasePath();
+        String relativePath = path.getRelativePath();
+        if (StringUtils.isBlank(host)) {
+            return basePath + relativePath;
+        } else {
+            return swagger.getSchemes().get(0) + host + basePath + relativePath;
         }
     }
 
