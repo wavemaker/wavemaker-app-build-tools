@@ -7,17 +7,20 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.wavemaker.studio.common.OperationNotExistException;
 import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
+import com.wavemaker.studio.common.OperationNotExistException;
 import com.wavemaker.studio.common.servicedef.model.Parameter;
 import com.wavemaker.studio.common.servicedef.model.ServiceDefinition;
 import com.wavemaker.studio.common.servicedef.model.WMServiceOperationInfo;
 import com.wavemaker.studio.common.swaggerdoc.handler.OperationHandler;
 import com.wavemaker.studio.common.swaggerdoc.handler.PathHandler;
 import com.wavemaker.studio.common.swaggerdoc.util.SwaggerDocUtil;
+import com.wavemaker.studio.common.util.Tuple;
+import com.wavemaker.tools.apidocs.tools.core.model.Info;
 import com.wavemaker.tools.apidocs.tools.core.model.Operation;
 import com.wavemaker.tools.apidocs.tools.core.model.Path;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
+import com.wavemaker.tools.apidocs.tools.core.model.VendorUtils;
 import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinition;
 
 /**
@@ -26,6 +29,8 @@ import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinitio
  */
 public class ServiceDefGenerator {
 
+    private static final String WEB_REST_PROXY = "USE_PROXY_FOR_WEB";
+    private static final String MOBILE_REST_PROXY = "USE_PROXY_FOR_MOBILE";
     private final Swagger swagger;
 
     public ServiceDefGenerator(final Swagger swagger) {
@@ -46,8 +51,9 @@ public class ServiceDefGenerator {
 
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                            final String serviceOperationPath = getServiceOperationPath(swagger, path);
-                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, serviceOperationPath);
+                            final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
+                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
+                                    operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
 
 
                             serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
@@ -82,8 +88,9 @@ public class ServiceDefGenerator {
                         if (operation.getOperationId().equals(operationId)) {
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                            final String serviceOperationPath = getServiceOperationPath(swagger, path);
-                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger, operation, operationHttpType, serviceOperationPath);
+                            final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
+                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
+                                    operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
 
 
                             return new ServiceDefinition().getNewInstance()
@@ -103,17 +110,31 @@ public class ServiceDefGenerator {
     }
 
 
-    private WMServiceOperationInfo buildWMServiceOperationInfo(final Swagger swagger, final Operation operation, final String httpMethod, final String path) {
+    private WMServiceOperationInfo buildWMServiceOperationInfo(final Swagger swagger, final Operation operation,
+                                                               final String httpMethod, final String relativePath,
+                                                               final String directPath) {
         List<Parameter> parameters = buildParameters(swagger, operation);
-
+        Tuple.Two<Boolean, Boolean> tuple = getProxySettings(swagger);
         return WMServiceOperationInfo.getNewInstance()
                 .addName(operation.getMethodName())
                 .addHttpMethod(httpMethod)
-                .addPath(path)
+                .addRelativePath(relativePath)
+                .addDirectPath(directPath)
                 .addConsumes(operation.getConsumes())
                 .addProduces(operation.getProduces())
                 .addMethodType(httpMethod)
-                .addParameters(parameters);
+                .addParameters(parameters)
+                .addUseProxyForWeb(tuple.v1)
+                .addUseProxyForMobile(tuple.v2);
+    }
+
+    private Tuple.Two<Boolean, Boolean> getProxySettings(final Swagger swagger) {
+        Info info = swagger.getInfo();
+        Object webProxy = VendorUtils.getWMExtension(info, WEB_REST_PROXY);
+        Object mobileProxy = VendorUtils.getWMExtension(info, MOBILE_REST_PROXY);
+        boolean useProxyForWeb = Boolean.valueOf(webProxy.toString());
+        boolean useProxyForMobile = Boolean.valueOf(mobileProxy.toString());
+        return new Tuple.Two(useProxyForWeb, useProxyForMobile);
     }
 
     private List<Parameter> buildParameters(final Swagger swagger, final Operation operation) {
@@ -158,15 +179,15 @@ public class ServiceDefGenerator {
         }
     }
 
-    private String getServiceOperationPath(Swagger swagger, Path path) {
-        String host = swagger.getHost();
+    private String getServiceOperationRelativePath(Swagger swagger, Path path) {
         String basePath = swagger.getBasePath();
-        String relativePath = path.getRelativePath();
-        if (StringUtils.isBlank(host)) {
-            return basePath + relativePath;
-        } else {
-            return swagger.getSchemes().get(0) + host + basePath + relativePath;
+        String relativePath = path.getBasePath();
+        if (!StringUtils.isBlank(basePath)) {
+            relativePath = basePath + relativePath;
         }
+        return relativePath;
     }
+
+
 
 }
