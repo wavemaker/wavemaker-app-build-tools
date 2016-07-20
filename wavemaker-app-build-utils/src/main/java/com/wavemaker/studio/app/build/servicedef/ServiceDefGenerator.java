@@ -131,8 +131,8 @@ public class ServiceDefGenerator {
         Info info = swagger.getInfo();
         Object webProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_WEB);
         Object mobileProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_MOBILE);
-        boolean useProxyForWeb = Boolean.valueOf(webProxy.toString());
-        boolean useProxyForMobile = Boolean.valueOf(mobileProxy.toString());
+        boolean useProxyForWeb = (webProxy != null)? Boolean.valueOf(webProxy.toString()) : true;
+        boolean useProxyForMobile = (mobileProxy != null)? Boolean.valueOf(mobileProxy.toString()) : true;
         return new Tuple.Two(useProxyForWeb, useProxyForMobile);
     }
 
