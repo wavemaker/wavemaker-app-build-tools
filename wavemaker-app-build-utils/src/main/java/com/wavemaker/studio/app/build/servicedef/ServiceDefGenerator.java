@@ -12,6 +12,7 @@ import com.wavemaker.studio.common.OperationNotExistException;
 import com.wavemaker.studio.common.servicedef.model.Parameter;
 import com.wavemaker.studio.common.servicedef.model.ServiceDefinition;
 import com.wavemaker.studio.common.servicedef.model.WMServiceOperationInfo;
+import com.wavemaker.studio.common.swaggerdoc.constants.RestSwaggerConstants;
 import com.wavemaker.studio.common.swaggerdoc.handler.OperationHandler;
 import com.wavemaker.studio.common.swaggerdoc.handler.PathHandler;
 import com.wavemaker.studio.common.swaggerdoc.util.SwaggerDocUtil;
@@ -29,8 +30,6 @@ import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinitio
  */
 public class ServiceDefGenerator {
 
-    private static final String WEB_REST_PROXY = "USE_PROXY_FOR_WEB";
-    private static final String MOBILE_REST_PROXY = "USE_PROXY_FOR_MOBILE";
     private final Swagger swagger;
 
     public ServiceDefGenerator(final Swagger swagger) {
@@ -66,7 +65,7 @@ public class ServiceDefGenerator {
                         }
                 }
             } catch (Exception e) {
-                throw new ServiceDefGenerationException(e);
+                    throw new ServiceDefGenerationException(e);
             }
         }
         return serviceDefs;
@@ -130,8 +129,8 @@ public class ServiceDefGenerator {
 
     private Tuple.Two<Boolean, Boolean> getProxySettings(final Swagger swagger) {
         Info info = swagger.getInfo();
-        Object webProxy = VendorUtils.getWMExtension(info, WEB_REST_PROXY);
-        Object mobileProxy = VendorUtils.getWMExtension(info, MOBILE_REST_PROXY);
+        Object webProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_WEB);
+        Object mobileProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_MOBILE);
         boolean useProxyForWeb = Boolean.valueOf(webProxy.toString());
         boolean useProxyForMobile = Boolean.valueOf(mobileProxy.toString());
         return new Tuple.Two(useProxyForWeb, useProxyForMobile);
