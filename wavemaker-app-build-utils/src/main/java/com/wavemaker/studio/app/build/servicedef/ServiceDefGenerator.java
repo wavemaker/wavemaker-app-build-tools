@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.studio.common.OperationNotExistException;
 import com.wavemaker.studio.common.servicedef.model.Parameter;
+import com.wavemaker.studio.common.servicedef.model.ProxySettings;
 import com.wavemaker.studio.common.servicedef.model.ServiceDefinition;
 import com.wavemaker.studio.common.servicedef.model.WMServiceOperationInfo;
 import com.wavemaker.studio.common.swaggerdoc.constants.RestSwaggerConstants;
@@ -50,9 +51,8 @@ public class ServiceDefGenerator {
 
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                            final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
                             final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
-                                    operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
+                                    operation, operationHttpType, path.getBasePath(), path.getCompletePath());
 
 
                             serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
@@ -87,9 +87,8 @@ public class ServiceDefGenerator {
                         if (operation.getOperationId().equals(operationId)) {
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                            final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
                             final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
-                                    operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
+                                    operation, operationHttpType, path.getBasePath(), path.getCompletePath());
 
 
                             return new ServiceDefinition().getNewInstance()
@@ -113,7 +112,7 @@ public class ServiceDefGenerator {
                                                                final String httpMethod, final String relativePath,
                                                                final String directPath) {
         List<Parameter> parameters = buildParameters(swagger, operation);
-        Tuple.Two<Boolean, Boolean> tuple = getProxySettings(swagger);
+        ProxySettings proxySettings = getProxySettings(swagger);
         return WMServiceOperationInfo.getNewInstance()
                 .addName(operation.getMethodName())
                 .addHttpMethod(httpMethod)
@@ -123,17 +122,16 @@ public class ServiceDefGenerator {
                 .addProduces(operation.getProduces())
                 .addMethodType(httpMethod)
                 .addParameters(parameters)
-                .addUseProxyForWeb(tuple.v1)
-                .addUseProxyForMobile(tuple.v2);
+                .addProxySettings(proxySettings);
     }
 
-    private Tuple.Two<Boolean, Boolean> getProxySettings(final Swagger swagger) {
+    private ProxySettings getProxySettings(final Swagger swagger) {
         Info info = swagger.getInfo();
         Object webProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_WEB);
         Object mobileProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_MOBILE);
         boolean useProxyForWeb = (webProxy != null)? Boolean.valueOf(webProxy.toString()) : true;
         boolean useProxyForMobile = (mobileProxy != null)? Boolean.valueOf(mobileProxy.toString()) : true;
-        return new Tuple.Two(useProxyForWeb, useProxyForMobile);
+        return new ProxySettings(useProxyForWeb, useProxyForMobile);
     }
 
     private List<Parameter> buildParameters(final Swagger swagger, final Operation operation) {
@@ -177,16 +175,4 @@ public class ServiceDefGenerator {
             }
         }
     }
-
-    private String getServiceOperationRelativePath(Swagger swagger, Path path) {
-        String basePath = swagger.getBasePath();
-        String relativePath = path.getBasePath();
-        if (!StringUtils.isBlank(basePath)) {
-            relativePath = basePath + relativePath;
-        }
-        return relativePath;
-    }
-
-
-
 }
