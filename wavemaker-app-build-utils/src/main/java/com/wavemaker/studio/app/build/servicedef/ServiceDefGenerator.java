@@ -5,19 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.studio.common.OperationNotExistException;
 import com.wavemaker.studio.common.servicedef.model.Parameter;
-import com.wavemaker.studio.common.servicedef.model.ProxySettings;
+import com.wavemaker.studio.common.servicedef.model.RuntimeProxySettings;
 import com.wavemaker.studio.common.servicedef.model.ServiceDefinition;
 import com.wavemaker.studio.common.servicedef.model.WMServiceOperationInfo;
 import com.wavemaker.studio.common.swaggerdoc.constants.RestSwaggerConstants;
 import com.wavemaker.studio.common.swaggerdoc.handler.OperationHandler;
 import com.wavemaker.studio.common.swaggerdoc.handler.PathHandler;
 import com.wavemaker.studio.common.swaggerdoc.util.SwaggerDocUtil;
-import com.wavemaker.studio.common.util.Tuple;
 import com.wavemaker.tools.apidocs.tools.core.model.Info;
 import com.wavemaker.tools.apidocs.tools.core.model.Operation;
 import com.wavemaker.tools.apidocs.tools.core.model.Path;
@@ -112,7 +109,7 @@ public class ServiceDefGenerator {
                                                                final String httpMethod, final String relativePath,
                                                                final String directPath) {
         List<Parameter> parameters = buildParameters(swagger, operation);
-        ProxySettings proxySettings = getProxySettings(swagger);
+        RuntimeProxySettings proxySettings = getProxySettings(swagger);
         return WMServiceOperationInfo.getNewInstance()
                 .addName(operation.getMethodName())
                 .addHttpMethod(httpMethod)
@@ -125,13 +122,13 @@ public class ServiceDefGenerator {
                 .addProxySettings(proxySettings);
     }
 
-    private ProxySettings getProxySettings(final Swagger swagger) {
+    private RuntimeProxySettings getProxySettings(final Swagger swagger) {
         Info info = swagger.getInfo();
         Object webProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_WEB);
         Object mobileProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_MOBILE);
         boolean useProxyForWeb = (webProxy != null)? Boolean.valueOf(webProxy.toString()) : true;
         boolean useProxyForMobile = (mobileProxy != null)? Boolean.valueOf(mobileProxy.toString()) : true;
-        return new ProxySettings(useProxyForWeb, useProxyForMobile);
+        return new RuntimeProxySettings(useProxyForWeb, useProxyForMobile);
     }
 
     private List<Parameter> buildParameters(final Swagger swagger, final Operation operation) {
