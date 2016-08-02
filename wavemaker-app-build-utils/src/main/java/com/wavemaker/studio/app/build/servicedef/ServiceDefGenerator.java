@@ -15,11 +15,7 @@ import com.wavemaker.studio.common.swaggerdoc.constants.RestSwaggerConstants;
 import com.wavemaker.studio.common.swaggerdoc.handler.OperationHandler;
 import com.wavemaker.studio.common.swaggerdoc.handler.PathHandler;
 import com.wavemaker.studio.common.swaggerdoc.util.SwaggerDocUtil;
-import com.wavemaker.tools.apidocs.tools.core.model.Info;
-import com.wavemaker.tools.apidocs.tools.core.model.Operation;
-import com.wavemaker.tools.apidocs.tools.core.model.Path;
-import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
-import com.wavemaker.tools.apidocs.tools.core.model.VendorUtils;
+import com.wavemaker.tools.apidocs.tools.core.model.*;
 import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinition;
 
 /**
@@ -48,8 +44,9 @@ public class ServiceDefGenerator {
 
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
+                            final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
                             final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
-                                    operation, operationHttpType, path.getBasePath(), path.getCompletePath());
+                                    operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
 
 
                             serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
@@ -62,7 +59,7 @@ public class ServiceDefGenerator {
                         }
                 }
             } catch (Exception e) {
-                    throw new ServiceDefGenerationException(e);
+                throw new ServiceDefGenerationException(e);
             }
         }
         return serviceDefs;
@@ -75,7 +72,7 @@ public class ServiceDefGenerator {
      * @return service definition for given operation Id.
      * @throws OperationNotExistException when operationId does not exist in the swagger object.
      */
-    public ServiceDefinition generate(String operationId) throws OperationNotExistException,ServiceDefGenerationException {
+    public ServiceDefinition generate(String operationId) throws OperationNotExistException, ServiceDefGenerationException {
         try {
             for (Map.Entry entry : swagger.getPaths().entrySet()) {
                 Path path = (Path) entry.getValue();
@@ -84,8 +81,9 @@ public class ServiceDefGenerator {
                         if (operation.getOperationId().equals(operationId)) {
                             final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
+                            final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
                             final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
-                                    operation, operationHttpType, path.getBasePath(), path.getCompletePath());
+                                    operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
 
 
                             return new ServiceDefinition().getNewInstance()
@@ -126,8 +124,8 @@ public class ServiceDefGenerator {
         Info info = swagger.getInfo();
         Object webProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_WEB);
         Object mobileProxy = VendorUtils.getWMExtension(info, RestSwaggerConstants.USE_PROXY_FOR_MOBILE);
-        boolean useProxyForWeb = (webProxy != null)? Boolean.valueOf(webProxy.toString()) : true;
-        boolean useProxyForMobile = (mobileProxy != null)? Boolean.valueOf(mobileProxy.toString()) : true;
+        boolean useProxyForWeb = (webProxy != null) ? Boolean.valueOf(webProxy.toString()) : true;
+        boolean useProxyForMobile = (mobileProxy != null) ? Boolean.valueOf(mobileProxy.toString()) : true;
         return new RuntimeProxySettings(useProxyForWeb, useProxyForMobile);
     }
 
@@ -171,5 +169,16 @@ public class ServiceDefGenerator {
 
             }
         }
+    }
+
+    private String getServiceOperationRelativePath(Swagger swagger, Path path) {
+        String swaggerBasePath = swagger.getBasePath();
+        String pathBasePath = path.getBasePath();
+        if (swaggerBasePath == null) {
+            return pathBasePath + path.getRelativePath();
+        } else if (swaggerBasePath.endsWith("/") && pathBasePath.startsWith("/")) {
+            swaggerBasePath = swaggerBasePath.substring(0, swaggerBasePath.length() - 1);
+        }
+        return swaggerBasePath + pathBasePath + path.getRelativePath();
     }
 }
