@@ -94,7 +94,8 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
 
             if (StringUtils.isNotBlank(basePackage)) {
                 SwaggerGenerator swaggerGenerator = new SwaggerGenerator(basePackage);
-                Swagger swagger = swaggerGenerator.setClassLoader(urlClassLoader).setSwaggerInfo(buildSwaggerInfo()).generate();
+                final Info swaggerInfo = buildSwaggerInfo(serviceFolder.getName());
+                Swagger swagger = swaggerGenerator.setClassLoader(urlClassLoader).setSwaggerInfo(swaggerInfo).generate();
 
                 marshallAndWriteToFile(swagger, serviceFolder.getFolder(DESIGN_TIME_FOLDER));
             }
@@ -114,10 +115,10 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
         }
     }
 
-    protected Info buildSwaggerInfo() {
+    protected Info buildSwaggerInfo(String serviceId) {
         Info info = new Info();
         info.setDescription("Swagger API documentation");
-        info.setServiceId(null);
+        info.setServiceId(serviceId);
         info.setServiceType(null);
         info.setVersion("2.0");
         info.setTitle("Service Swagger Documentation");
