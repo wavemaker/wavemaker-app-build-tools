@@ -47,13 +47,12 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
     private static final String DESIGN_TIME_FOLDER = "designtime";
     private static final String API_EXTENSION = "_API.json";
     private static final String REST_SERVICE_API_EXTENSION = "_API_REST_SERVICE.json";
+    public static final String SERVICE_SRC_DIR = "src";
     private static String SERVICE_DEF_RESOURCE_NAME = "{}-service-definitions.json";
 
 
     private final String servicesDirectory = "services";
-    private final String outputDirectory = "target/classes";
     private final Folder servicesFolder;
-    private final Folder targetClassesFolder;
     private final Folder rootFolder;
 
     private ExecutorService executorService = Executors.newFixedThreadPool(5);
@@ -63,7 +62,6 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
     public VariableServiceDefGenerationHandler(Folder rootFolder) {
         this.rootFolder = rootFolder;
         this.servicesFolder = rootFolder.getFolder(servicesDirectory);
-        this.targetClassesFolder = rootFolder.getFolder(outputDirectory);
     }
 
     @Override
@@ -206,7 +204,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
     }
 
 
-    private void persistServiceDefs() {
+    protected void persistServiceDefs() {
         for (final String service : filteredServiceDefinitions.keySet()) {
             if (filteredServiceDefinitions.get(service).size() > 0) {
                 persistServiceDefs(service, filteredServiceDefinitions.get(service));
@@ -215,7 +213,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
     }
 
     protected void persistServiceDefs(final String serviceId, final Map<String, ServiceDefinition> serviceDefMap) {
-        File serviceDefResource = getServiceDefResource(targetClassesFolder, serviceId);
+        File serviceDefResource = getServiceDefResource(serviceId);
         OutputStream outputStream = null;
         try {
             outputStream = serviceDefResource.getContent().asOutputStream();
@@ -227,8 +225,9 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         }
     }
 
-    protected File getServiceDefResource(final Folder runtimeFolder, final String serviceId) {
-        File file = runtimeFolder.getFolder(SERVICE_DEFS).getFile(SERVICE_DEF_RESOURCE_NAME.replace("{}", serviceId));
+    protected File getServiceDefResource(final String serviceId) {
+        final Folder serviceFolder = servicesFolder.getFolder(serviceId).getFolder(SERVICE_SRC_DIR);
+        File file = serviceFolder.getFolder(SERVICE_DEFS).getFile(SERVICE_DEF_RESOURCE_NAME.replace("{}", serviceId));
         if (!file.exists()) {
             file.createIfMissing();
         }
