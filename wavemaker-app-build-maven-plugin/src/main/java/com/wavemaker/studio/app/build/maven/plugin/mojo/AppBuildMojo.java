@@ -20,19 +20,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.maven.execution.MavenSession;
+import org.apache.maven.model.Build;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.shared.filtering.MavenFilteringException;
+import org.apache.maven.shared.filtering.MavenResourcesExecution;
+import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 
 import com.wavemaker.studio.app.build.maven.plugin.handler.AppBuildHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.PageMinFileGenerationHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.VariableServiceDefGenerationHandler;
+import com.wavemaker.studio.common.WMRuntimeException;
 import com.wavemaker.studio.common.io.Folder;
 import com.wavemaker.studio.common.io.local.LocalFolder;
 
@@ -41,6 +44,8 @@ import com.wavemaker.studio.common.io.local.LocalFolder;
  */
 @Mojo(name = "generate", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class AppBuildMojo extends AbstractMojo {
+
+    public static final String ENCODING = "UTF-8";
 
     @Parameter(property = "project", required = true, readonly = true)
     private MavenProject project;
@@ -57,6 +62,12 @@ public class AppBuildMojo extends AbstractMojo {
     @Parameter(name = "outputDirectory", defaultValue = "target/classes")
     private String outputDirectory;
 
+    @Parameter(defaultValue = "${session}")
+    private MavenSession session;
+
+    @Component
+    private MavenResourcesFiltering mavenResourcesFiltering;
+
     private List<AppBuildHandler> appBuildHandlers;
 
     @Override
@@ -65,6 +76,17 @@ public class AppBuildMojo extends AbstractMojo {
 
         for(AppBuildHandler appBuildHandler : appBuildHandlers){
             appBuildHandler.handle();
+        }
+
+        final Build build = project.getBuild();
+        MavenResourcesExecution mavenResourcesExecution =
+                new MavenResourcesExecution ( build.getResources(), new File(outputDirectory), project,
+                        ENCODING, build.getFilters(),null, session);
+
+        try {
+            mavenResourcesFiltering.filterResources( mavenResourcesExecution );
+        } catch (MavenFilteringException e) {
+            throw new WMRuntimeException("Failed to execute resource filtering ", e);
         }
     }
 
