@@ -168,4 +168,33 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <profiles>
+        <profile>
+            <id>Snapshot</id>
+            <activation>
+                <property>
+                    <name>Snapshot</name>
+                </property>
+            </activation>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>mvn-snapshot-repo</id>
+                    <uniqueVersion>true</uniqueVersion>
+                    <name>maven snapshot repository</name>
+                    <url>file:/tmp</url>
+                </snapshotRepository>
+            </distributionManagement>
+            <build>
+                <finalName>${project.artifactId}-${maven.build.timestamp}</finalName>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>2.4</version>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>
