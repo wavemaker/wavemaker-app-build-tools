@@ -181,7 +181,7 @@
                     <id>mvn-snapshot-repo</id>
                     <uniqueVersion>true</uniqueVersion>
                     <name>maven snapshot repository</name>
-                    <url>file:/tmp</url>
+                    <url>file:/tmp/wm-repo</url>
                 </snapshotRepository>
             </distributionManagement>
             <build>
