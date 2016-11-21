@@ -176,6 +176,9 @@
                     <name>Snapshot</name>
                 </property>
             </activation>
+            <properties>
+                <maven.build.timestamp.format>yyyyMMdd.HHmmss</maven.build.timestamp.format>
+            </properties>
             <distributionManagement>
                 <snapshotRepository>
                     <id>mvn-snapshot-repo</id>
