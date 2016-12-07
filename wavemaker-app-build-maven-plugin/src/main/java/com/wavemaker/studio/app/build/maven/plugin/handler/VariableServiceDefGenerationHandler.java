@@ -44,9 +44,11 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
 
     private static final String SERVICE_DEFS = "servicedefs";
     private static final String WM_SERVICE_VARIABLE = "wm.ServiceVariable";
+    private static final String WEBSOCKET_VARIABLE = "wm.WebSocketVariable";
     private static final String DESIGN_TIME_FOLDER = "designtime";
     private static final String API_EXTENSION = "_API.json";
     private static final String REST_SERVICE_API_EXTENSION = "_API_REST_SERVICE.json";
+    private static final String WEBSOCKET_SERVICE_API_EXTENSION = "_API_WEBSOCKET_SERVICE.json";
     public static final String SERVICE_SRC_DIR = "src";
     private static String SERVICE_DEF_RESOURCE_NAME = "{}-service-definitions.json";
 
@@ -97,15 +99,19 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
 
     private Map<String, ServiceDefinition> buildServiceDefs(final Folder serviceFolder) {
         Folder designFolder = serviceFolder.getFolder(DESIGN_TIME_FOLDER);
-        File swaggerFile = designFolder.getFile(designFolder.getParent().getName() + API_EXTENSION);
-        File restSwaggerFile = designFolder.getFile(designFolder.getParent().getName() + REST_SERVICE_API_EXTENSION);
+        String[] possibleSwaggerJsonExtensions = new String[] {API_EXTENSION, REST_SERVICE_API_EXTENSION, WEBSOCKET_SERVICE_API_EXTENSION};
         Swagger swagger = null;
-        if (restSwaggerFile.exists()) {
-            swagger = unmarshallSwagger(restSwaggerFile);
-        } else if (swaggerFile.exists()) {
-            swagger = unmarshallSwagger(swaggerFile);
-        } else {
-            logger.error("Swagger api documentation swaggerFile does not exist for service " + serviceFolder.getName());
+        boolean swaggerFileFound = false;
+        for (String possibleSwaggerJsonExtension : possibleSwaggerJsonExtensions) {
+            File swaggerFile = designFolder.getFile(designFolder.getParent().getName() + possibleSwaggerJsonExtension);
+            if (swaggerFile.exists()) {
+                swaggerFileFound = true;
+                swagger = unmarshallSwagger(swaggerFile);
+                break;
+            }
+        }
+        if (!swaggerFileFound) {
+            logger.error("Swagger File does not exist for service {}", serviceFolder.getName());
         }
         try {
             return swagger != null ? new ServiceDefGenerator(swagger).generate() : new HashMap<String, ServiceDefinition>();
@@ -173,7 +179,11 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         while (keys.hasNext()) {
             String key = (String) keys.next();
             JSONObject o = (JSONObject) jsonObject.get(key);
-            if (o.has("category") && o.getString("category").equals(WM_SERVICE_VARIABLE)) {
+            if (o.has("category")) {
+                String category = o.getString("category");
+                if (!(WM_SERVICE_VARIABLE.equals(category) || WEBSOCKET_VARIABLE.equals(category))) {
+                    continue;
+                }
                 if (!o.has("operationId")) {
                     logger.warn("Service variable " + key + " does not have operation id ");
                     continue;
