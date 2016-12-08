@@ -51,6 +51,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
     private static final String WEBSOCKET_SERVICE_API_EXTENSION = "_API_WEBSOCKET_SERVICE.json";
     public static final String SERVICE_SRC_DIR = "src";
     private static String SERVICE_DEF_RESOURCE_NAME = "{}-service-definitions.json";
+    private static final String[] SWAGGER_EXTENSIONS = new String[] {WEBSOCKET_SERVICE_API_EXTENSION, REST_SERVICE_API_EXTENSION, API_EXTENSION};
 
 
     private final String servicesDirectory = "services";
@@ -99,11 +100,10 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
 
     private Map<String, ServiceDefinition> buildServiceDefs(final Folder serviceFolder) {
         Folder designFolder = serviceFolder.getFolder(DESIGN_TIME_FOLDER);
-        String[] possibleSwaggerJsonExtensions = new String[] {API_EXTENSION, REST_SERVICE_API_EXTENSION, WEBSOCKET_SERVICE_API_EXTENSION};
         Swagger swagger = null;
         boolean swaggerFileFound = false;
-        for (String possibleSwaggerJsonExtension : possibleSwaggerJsonExtensions) {
-            File swaggerFile = designFolder.getFile(designFolder.getParent().getName() + possibleSwaggerJsonExtension);
+        for (String swaggerExtension : SWAGGER_EXTENSIONS) {
+            File swaggerFile = designFolder.getFile(designFolder.getParent().getName() + swaggerExtension);
             if (swaggerFile.exists()) {
                 swaggerFileFound = true;
                 swagger = unmarshallSwagger(swaggerFile);
@@ -118,7 +118,6 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         } catch (ServiceDefGenerationException e) {
             throw new WMRuntimeException("Failed to build service def for service " + swagger.getInfo().getServiceId(), e);
         }
-
     }
 
 
