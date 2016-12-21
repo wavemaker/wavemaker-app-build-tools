@@ -78,7 +78,7 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
     @Override
     public void handle() {
         try {
-            urlClassLoader = new URLClassLoader(classPathURLs, Thread.currentThread().getContextClassLoader());
+            urlClassLoader = new URLClassLoader(classPathURLs, null);
 
             List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
             if (serviceFolders.size() > 0) {
