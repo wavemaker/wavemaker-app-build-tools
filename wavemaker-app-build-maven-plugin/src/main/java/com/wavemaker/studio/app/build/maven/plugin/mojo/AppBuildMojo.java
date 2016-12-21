@@ -18,7 +18,9 @@ package com.wavemaker.studio.app.build.maven.plugin.mojo;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.model.Build;
@@ -125,12 +127,15 @@ public class AppBuildMojo extends AbstractMojo {
     private URL[] getRuntimeClasspathElements() throws MojoFailureException {
         URL[] runtimeUrls = null;
         try {
+            List<String> compileClasspathElements = project.getCompileClasspathElements();
             List<String> runtimeClasspathElements = project.getRuntimeClasspathElements();
-            runtimeUrls = new URL[runtimeClasspathElements.size()];
-            String runtimeClasspathElement;
-            for (int i = 0; i < runtimeClasspathElements.size(); i++) {
-                runtimeClasspathElement = runtimeClasspathElements.get(i);
-                runtimeUrls[i] = new File(runtimeClasspathElement).toURI().toURL();
+            Set<String> allClassPathElements = new LinkedHashSet<>(compileClasspathElements.size());
+            allClassPathElements.addAll(compileClasspathElements);
+            allClassPathElements.addAll(runtimeClasspathElements);
+            runtimeUrls = new URL[allClassPathElements.size()];
+            int index=0;
+            for (String s: allClassPathElements ) {
+                runtimeUrls[index++] = new File(s).toURI().toURL();
             }
         } catch (Exception exception) {
             throw new MojoFailureException("Failed resolve project dependencies", exception);
