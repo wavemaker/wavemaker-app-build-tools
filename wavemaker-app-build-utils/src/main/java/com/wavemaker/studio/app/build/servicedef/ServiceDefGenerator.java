@@ -145,6 +145,7 @@ public class ServiceDefGenerator {
         return Parameter.getNewInstance()
                 .addName(name)
                 .addParameterType(parameter.getIn())
+                .addRequired(parameter.getRequired())
                 .addType(fullyQualifiedName);
     }
 
