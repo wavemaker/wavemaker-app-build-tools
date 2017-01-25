@@ -18,9 +18,9 @@ package com.wavemaker.studio.app.build.pages;
 import java.util.List;
 
 import com.wavemaker.studio.app.build.constants.AppBuildConstants;
-import com.wavemaker.studio.common.WMRuntimeException;
-import com.wavemaker.studio.common.io.File;
-import com.wavemaker.studio.common.io.Folder;
+import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.File;
+import com.wavemaker.commons.io.Folder;
 
 /**
  * Created by saddhamp on 14/4/16.

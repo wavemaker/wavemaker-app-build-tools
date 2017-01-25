@@ -43,9 +43,9 @@ import com.wavemaker.studio.app.build.maven.plugin.handler.AppBuildHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.PageMinFileGenerationHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
 import com.wavemaker.studio.app.build.maven.plugin.handler.VariableServiceDefGenerationHandler;
-import com.wavemaker.studio.common.WMRuntimeException;
-import com.wavemaker.studio.common.io.Folder;
-import com.wavemaker.studio.common.io.local.LocalFolder;
+import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.Folder;
+import com.wavemaker.commons.io.local.LocalFolder;
 
 /**
  * Created by saddhamp on 12/4/16.

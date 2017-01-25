@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
-import com.wavemaker.studio.common.OperationNotExistException;
-import com.wavemaker.studio.common.servicedef.model.Parameter;
-import com.wavemaker.studio.common.servicedef.model.RuntimeProxySettings;
-import com.wavemaker.studio.common.servicedef.model.ServiceDefinition;
-import com.wavemaker.studio.common.servicedef.model.WMServiceOperationInfo;
-import com.wavemaker.studio.common.swaggerdoc.constants.WebSwaggerConstants;
-import com.wavemaker.studio.common.swaggerdoc.handler.OperationHandler;
-import com.wavemaker.studio.common.swaggerdoc.handler.PathHandler;
-import com.wavemaker.studio.common.swaggerdoc.util.SwaggerDocUtil;
+import com.wavemaker.commons.OperationNotExistException;
+import com.wavemaker.commons.servicedef.model.Parameter;
+import com.wavemaker.commons.servicedef.model.RuntimeProxySettings;
+import com.wavemaker.commons.servicedef.model.ServiceDefinition;
+import com.wavemaker.commons.servicedef.model.WMServiceOperationInfo;
+import com.wavemaker.commons.swaggerdoc.constants.WebSwaggerConstants;
+import com.wavemaker.commons.swaggerdoc.handler.OperationHandler;
+import com.wavemaker.commons.swaggerdoc.handler.PathHandler;
+import com.wavemaker.commons.swaggerdoc.util.SwaggerDocUtil;
 import com.wavemaker.tools.apidocs.tools.core.model.*;
 import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinition;
 

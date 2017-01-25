@@ -25,14 +25,14 @@ import org.slf4j.LoggerFactory;
 
 import com.wavemaker.studio.app.build.servicedef.ServiceDefGenerator;
 import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
-import com.wavemaker.studio.common.WMRuntimeException;
-import com.wavemaker.studio.common.io.File;
-import com.wavemaker.studio.common.io.FilterOn;
-import com.wavemaker.studio.common.io.Folder;
-import com.wavemaker.studio.common.io.Resources;
-import com.wavemaker.studio.common.json.JSONUtils;
-import com.wavemaker.studio.common.servicedef.model.ServiceDefinition;
-import com.wavemaker.studio.common.util.IOUtils;
+import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.File;
+import com.wavemaker.commons.io.FilterOn;
+import com.wavemaker.commons.io.Folder;
+import com.wavemaker.commons.io.Resources;
+import com.wavemaker.commons.json.JSONUtils;
+import com.wavemaker.commons.servicedef.model.ServiceDefinition;
+import com.wavemaker.commons.util.IOUtils;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 
 /**

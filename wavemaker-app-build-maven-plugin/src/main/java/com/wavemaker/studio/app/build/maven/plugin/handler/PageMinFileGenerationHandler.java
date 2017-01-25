@@ -18,8 +18,8 @@ package com.wavemaker.studio.app.build.maven.plugin.handler;
 import java.util.List;
 
 import com.wavemaker.studio.app.build.pages.PageMinFileGenerator;
-import com.wavemaker.studio.common.WMRuntimeException;
-import com.wavemaker.studio.common.io.Folder;
+import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.Folder;
 
 /**
  * Created by saddhamp on 21/4/16.

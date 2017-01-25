@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 
 import com.wavemaker.studio.app.build.constants.AppBuildConstants;
-import com.wavemaker.studio.common.WMRuntimeException;
-import com.wavemaker.studio.common.io.File;
-import com.wavemaker.studio.common.io.Folder;
-import com.wavemaker.studio.common.util.RegexConstants;
+import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.File;
+import com.wavemaker.commons.io.Folder;
+import com.wavemaker.commons.util.RegexConstants;
 
 /**
  * Created by saddhamp on 15/4/16.

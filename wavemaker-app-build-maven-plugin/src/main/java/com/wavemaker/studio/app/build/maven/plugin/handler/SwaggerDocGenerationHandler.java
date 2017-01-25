@@ -36,10 +36,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.wavemaker.studio.app.build.BasePackage;
 import com.wavemaker.studio.app.build.swaggerdoc.SwaggerGenerator;
-import com.wavemaker.studio.common.WMRuntimeException;
-import com.wavemaker.studio.common.io.File;
-import com.wavemaker.studio.common.io.Folder;
-import com.wavemaker.studio.common.util.IOUtils;
+import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.File;
+import com.wavemaker.commons.io.Folder;
+import com.wavemaker.commons.util.IOUtils;
 import com.wavemaker.tools.apidocs.tools.core.model.Info;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 

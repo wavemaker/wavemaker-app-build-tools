@@ -19,10 +19,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.wavemaker.studio.common.WMRuntimeException;
-import com.wavemaker.studio.common.io.File;
-import com.wavemaker.studio.common.io.FilterOn;
-import com.wavemaker.studio.common.io.Folder;
+import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.File;
+import com.wavemaker.commons.io.FilterOn;
+import com.wavemaker.commons.io.Folder;
 
 /**
  * Created by saddhamp on 24/4/16.
