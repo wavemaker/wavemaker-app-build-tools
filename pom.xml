@@ -62,6 +62,38 @@
         <pluginManagement>
             <plugins>
                 <plugin>
+                   <groupId>com.mycila.maven-license-plugin</groupId>
+                     <artifactId>maven-license-plugin</artifactId>
+                        <version>1.9.0</version>
+                        <configuration>
+                          <header>${license.header.file}</header>
+                            <strictCheck>true</strictCheck>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <properties>
+                                <year>2017</year>
+                                <company>WaveMaker, Inc</company>
+                            </properties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>format-license</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>format</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>check-license</id>
+                                <phase>process-sources</phase>
+                                <goals>
+                                    <goal>check</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.5.1</version>
