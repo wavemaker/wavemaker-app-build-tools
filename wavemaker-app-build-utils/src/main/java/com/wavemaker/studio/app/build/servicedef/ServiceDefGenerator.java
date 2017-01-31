@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.wavemaker.studio.app.build.adapter.ServiceDefPropertiesAdapter;
 import com.wavemaker.studio.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.commons.OperationNotExistException;
 import com.wavemaker.commons.servicedef.model.Parameter;
@@ -38,6 +39,8 @@ import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinitio
  * @since 29/4/16
  */
 public class ServiceDefGenerator {
+
+    private final ServiceDefPropertiesAdapter serviceDefPropertiesAdapter = new ServiceDefPropertiesAdapter();
 
     private final Swagger swagger;
 
@@ -155,13 +158,18 @@ public class ServiceDefGenerator {
     }
 
     private Parameter buildParameter(final Swagger swagger, final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter) {
+        List<String> requiredFields = new ArrayList<>();
+        if (ParameterType.BODY.name().equals(parameter.getIn().toUpperCase())) {
+            requiredFields.addAll(serviceDefPropertiesAdapter.adaptToRequiredFields(swagger, parameter));
+        }
         final String fullyQualifiedName = SwaggerDocUtil.getParameterType(parameter);
         final String name = (parameter.getName() == null) ? parameter.getIn().toLowerCase() : parameter.getName();
         return Parameter.getNewInstance()
                 .addName(name)
                 .addParameterType(parameter.getIn())
                 .addRequired(parameter.getRequired())
-                .addType(fullyQualifiedName);
+                .addType(fullyQualifiedName)
+                .addRequiredFields(requiredFields);
     }
 
     private void buildSecurityParameters(final Swagger swagger, final Operation operation, final List<Parameter> parameters) {
