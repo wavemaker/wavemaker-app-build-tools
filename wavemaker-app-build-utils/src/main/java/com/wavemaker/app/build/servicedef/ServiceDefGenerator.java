@@ -1,12 +1,12 @@
 /**
  * Copyright © 2013 - 2017 WaveMaker, Inc.
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,8 @@
  */
 package com.wavemaker.app.build.servicedef;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,7 @@ import java.util.Map;
 import com.wavemaker.app.build.adapter.ServiceDefPropertiesAdapter;
 import com.wavemaker.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.commons.OperationNotExistException;
+import com.wavemaker.commons.json.JSONUtils;
 import com.wavemaker.commons.servicedef.model.Parameter;
 import com.wavemaker.commons.servicedef.model.RuntimeProxySettings;
 import com.wavemaker.commons.servicedef.model.ServiceDefinition;
@@ -160,7 +163,8 @@ public class ServiceDefGenerator {
     private Parameter buildParameter(final Swagger swagger, final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter) {
         List<String> requiredFields = new ArrayList<>();
         if (ParameterType.BODY.name().equals(parameter.getIn().toUpperCase())) {
-            requiredFields.addAll(serviceDefPropertiesAdapter.adaptToRequiredFields(swagger, parameter));
+            final List<String> fields = serviceDefPropertiesAdapter.adaptToRequiredFields(swagger, parameter);
+            requiredFields.addAll(fields == null ? new ArrayList<String>() : fields);
         }
         final String fullyQualifiedName = SwaggerDocUtil.getParameterType(parameter);
         final String name = (parameter.getName() == null) ? parameter.getIn().toLowerCase() : parameter.getName();
@@ -205,4 +209,21 @@ public class ServiceDefGenerator {
         }
         return swaggerBasePath + pathBasePath + path.getRelativePath();
     }
+
+    //test case to generate service defs from swagger.
+    public static void main(String[] args) {
+        try {
+            final Swagger swagger = JSONUtils.toObject(new File("../designtime/hrdb_API.json"), Swagger.class);
+            ServiceDefGenerator serviceDefGenerator = new ServiceDefGenerator(swagger);
+
+            final ServiceDefinition serviceDefinition = serviceDefGenerator.generate("UserController_createUser");
+            System.out.println(serviceDefinition);
+
+            final Map<String, ServiceDefinition> serviceDefinitions = serviceDefGenerator.generate();
+            System.out.println(serviceDefinitions);
+        } catch (IOException | OperationNotExistException | ServiceDefGenerationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

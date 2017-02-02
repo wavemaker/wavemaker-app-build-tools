@@ -1,6 +1,8 @@
 package com.wavemaker.app.build.swaggerdoc.handler;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.wavemaker.tools.apidocs.tools.core.model.ComposedModel;
 import com.wavemaker.tools.apidocs.tools.core.model.Model;
@@ -52,57 +54,89 @@ public class ModelHandler {
     }
 
 
-    public Map<String,Property> listProperties(Model model, int level) {
-        Map<String,Property> propertiesMap = new HashMap<>();
-        listProperties(model, level, propertiesMap);
+    public Map<String, Property> listProperties(Model model, int level) {
+        Map<String, Property> propertiesMap = new HashMap<>();
+        listPropertiesByModel(model, level, propertiesMap);
         return propertiesMap;
     }
 
-    private void listProperties(Model model, int level, Map<String,Property> propertiesMap) {
+    private void listPropertiesByModel(final Model model, final int level, final Map<String, Property> propertiesMap) {
+        if (model instanceof ModelImpl) {
+            listProperties(model, level, propertiesMap);
+        } else if (model instanceof ComposedModel) {
+            ComposedModel composedModel = (ComposedModel) model;
+            final List<Model> allOf = composedModel.getAllOf();
+            for (Model eachModel : allOf) {
+                listPropertiesByModel(eachModel, level, propertiesMap);
+            }
+            final Map<String, Property> properties = composedModel.getProperties();
+            if(properties != null) {
+                for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                    if (propertyEntry.getValue() instanceof RefProperty) {
+                        handleRefProperty(propertyEntry.getKey(), (RefProperty) propertyEntry.getValue(), propertiesMap, level);
+                    }
+                }
+            }
+        }
+    }
+
+    private void listProperties(Model model, int level, Map<String, Property> propertiesMap) {
         ModelImpl actualModel = (ModelImpl) model;
         if (level > 0) {
             final Map<String, Property> properties = actualModel.getProperties();
-            for (String propertyName : properties.keySet()) {
-                final Property property = properties.get(propertyName);
-                if(actualModel.getRequired().contains(propertyName)) {
-                    final PropertyHandler propertyHandler = new PropertyHandler(property, definitions);
-                    if (propertyHandler.isPrimitive()) {
-                        propertiesMap.put(propertyName,property);
-                    } else if (property instanceof ArrayProperty) {
-                        //this case occurs what property is List<int> || Set<Emp> || List<User> || Set<String> || ......
-                        ArrayProperty arrayProperty = (ArrayProperty) property;
-                        boolean isList = arrayProperty.isList();
-                        if (isList) {
-                            Property argProperty = arrayProperty.getItems();
-                            if (argProperty instanceof RefProperty) {
-                                // case : List<someObject> or Set<someObject>
-                                RefProperty refProperty = (RefProperty) argProperty;
-                                PropertyHandler refPropertyHandler = new PropertyHandler(refProperty, definitions);
-                                final Model refModel = definitions.get(refProperty.getName());
-                                propertiesMap.put(propertyName,refProperty);
-                                listProperties(refModel, level - 1, propertiesMap);
-                            } else {
-                                //case : List<primitive> or Set<primitive>
-                                propertiesMap.put(propertyName,argProperty);
-                            }
-                        }
-                    }
-                    else if (property instanceof RefProperty) {
-                        //this case occurs when property is Object<Object,Object....> eq : Page<Employee>
-                        RefProperty refProperty = (RefProperty) property;
-                        List<Property> argProperties = refProperty.getTypeArguments();
-                        for (Property argProperty : argProperties) {
-                            PropertyHandler argPropertyHandler = new PropertyHandler(argProperty, definitions);
-                            if (argPropertyHandler.isPrimitive()) {
-                                propertiesMap.put(propertyName,argProperty);
-                            } else {
-                                final Model argModel = definitions.get(argProperty.getName());
-                                propertiesMap.put(propertyName,argProperty);
-                                listProperties(argModel, level - 1, propertiesMap);
-                            }
+            if(properties != null) {
+                for (String propertyName : properties.keySet()) {
+                    final Property property = properties.get(propertyName);
+                    final List<String> required = actualModel.getRequired();
+                    if (required != null && required.contains(propertyName)) {
+                        final PropertyHandler propertyHandler = new PropertyHandler(property, definitions);
+                        if (propertyHandler.isPrimitive()) {
+                            propertiesMap.put(propertyName, property);
+                        } else if (property instanceof ArrayProperty) {
+                            handleArrayProperty(propertyName, (ArrayProperty) property, propertiesMap, level);
+
+                        } else if (property instanceof RefProperty) {
+                            handleRefProperty(propertyName, (RefProperty) property, propertiesMap, level);
+
                         }
                     }
                 }
+            }
+        }
+    }
+
+    private void handleArrayProperty(final String propertyName, final ArrayProperty property, final Map<String, Property> propertiesMap, final int level) {
+        //this case occurs what property is List<int> || Set<Emp> || List<User> || Set<String> || ......
+        ArrayProperty arrayProperty = property;
+        boolean isList = arrayProperty.isList();
+        if (isList) {
+            Property argProperty = arrayProperty.getItems();
+            if (argProperty instanceof RefProperty) {
+                // case : List<someObject> or Set<someObject>
+                RefProperty refProperty = (RefProperty) argProperty;
+                PropertyHandler refPropertyHandler = new PropertyHandler(refProperty, definitions);
+                final Model refModel = definitions.get(refProperty.getName());
+                propertiesMap.put(propertyName, refProperty);
+                listProperties(refModel, level - 1, propertiesMap);
+            } else {
+                //case : List<primitive> or Set<primitive>
+                propertiesMap.put(propertyName, argProperty);
+            }
+        }
+    }
+
+    private void handleRefProperty(final String propertyName, final RefProperty property, final Map<String, Property> propertiesMap, final int level) {
+        //this case occurs when property is Object<Object,Object....> eq : Page<Employee>
+        RefProperty refProperty = property;
+        List<Property> argProperties = refProperty.getTypeArguments();
+        for (Property argProperty : argProperties) {
+            PropertyHandler argPropertyHandler = new PropertyHandler(argProperty, definitions);
+            if (argPropertyHandler.isPrimitive()) {
+                propertiesMap.put(propertyName, argProperty);
+            } else {
+                final Model argModel = definitions.get(argProperty.getName());
+                propertiesMap.put(propertyName, argProperty);
+                listProperties(argModel, level - 1, propertiesMap);
             }
         }
     }
