@@ -70,7 +70,7 @@ public class ModelHandler {
                 listPropertiesByModel(eachModel, level, propertiesMap);
             }
             final Map<String, Property> properties = composedModel.getProperties();
-            if(properties != null) {
+            if (properties != null) {
                 for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
                     if (propertyEntry.getValue() instanceof RefProperty) {
                         handleRefProperty(propertyEntry.getKey(), (RefProperty) propertyEntry.getValue(), propertiesMap, level);
@@ -84,10 +84,10 @@ public class ModelHandler {
         ModelImpl actualModel = (ModelImpl) model;
         if (level > 0) {
             final Map<String, Property> properties = actualModel.getProperties();
-            if(properties != null) {
+            if (properties != null) {
+                final List<String> required = actualModel.getRequired();
                 for (String propertyName : properties.keySet()) {
                     final Property property = properties.get(propertyName);
-                    final List<String> required = actualModel.getRequired();
                     if (required != null && required.contains(propertyName)) {
                         final PropertyHandler propertyHandler = new PropertyHandler(property, definitions);
                         if (propertyHandler.isPrimitive()) {
@@ -115,7 +115,7 @@ public class ModelHandler {
                 // case : List<someObject> or Set<someObject>
                 RefProperty refProperty = (RefProperty) argProperty;
                 PropertyHandler refPropertyHandler = new PropertyHandler(refProperty, definitions);
-                final Model refModel = definitions.get(refProperty.getName());
+                final Model refModel = definitions.get(refProperty.getSimpleRef());
                 propertiesMap.put(propertyName, refProperty);
                 listProperties(refModel, level - 1, propertiesMap);
             } else {
@@ -129,15 +129,25 @@ public class ModelHandler {
         //this case occurs when property is Object<Object,Object....> eq : Page<Employee>
         RefProperty refProperty = property;
         List<Property> argProperties = refProperty.getTypeArguments();
-        for (Property argProperty : argProperties) {
-            PropertyHandler argPropertyHandler = new PropertyHandler(argProperty, definitions);
-            if (argPropertyHandler.isPrimitive()) {
-                propertiesMap.put(propertyName, argProperty);
-            } else {
-                final Model argModel = definitions.get(argProperty.getName());
-                propertiesMap.put(propertyName, argProperty);
-                listProperties(argModel, level - 1, propertiesMap);
+        if (argProperties.size() > 0) {
+            for (Property argProperty : argProperties) {
+                handleProperty(propertyName, propertiesMap, level, argProperty);
             }
+        } else {
+            handleProperty(propertyName, propertiesMap, level, refProperty);
+        }
+    }
+
+    private void handleProperty(final String propertyName, final Map<String, Property> propertiesMap, final int level, final Property property) {
+        PropertyHandler propertyHandler = new PropertyHandler(property, definitions);
+        if (propertyHandler.isPrimitive()) {
+            propertiesMap.put(propertyName, property);
+        } else if (propertyHandler.isArray()) {
+            handleArrayProperty(propertyName, (ArrayProperty) property, propertiesMap, level);
+        } else {
+            final Model argModel = definitions.get(((RefProperty) property).getSimpleRef());
+            propertiesMap.put(propertyName, property);
+            listProperties(argModel, level - 1, propertiesMap);
         }
     }
 }
