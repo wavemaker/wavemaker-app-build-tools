@@ -145,9 +145,9 @@ public class ModelHandler {
         } else if (propertyHandler.isArray()) {
             handleArrayProperty(propertyName, (ArrayProperty) property, propertiesMap, level);
         } else {
-            final Model argModel = definitions.get(((RefProperty) property).getSimpleRef());
+            final Model model = definitions.get(((RefProperty) property).getSimpleRef());
             propertiesMap.put(propertyName, property);
-            listProperties(argModel, level - 1, propertiesMap);
+            listPropertiesByModel(model, level - 1, propertiesMap);
         }
     }
 }
