@@ -33,6 +33,7 @@ import com.wavemaker.commons.swaggerdoc.handler.PathHandler;
 import com.wavemaker.commons.swaggerdoc.util.SwaggerDocUtil;
 import com.wavemaker.tools.apidocs.tools.core.model.*;
 import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinition;
+import com.wavemaker.tools.apidocs.tools.core.model.parameters.AbstractParameter;
 
 /**
  * @author <a href="mailto:sunil.pulugula@wavemaker.com">Sunil Kumar</a>
@@ -163,14 +164,18 @@ public class ServiceDefGenerator {
             final List<String> fields = serviceDefPropertiesAdapter.adaptToRequiredFields(swagger, parameter);
             requiredFields.addAll(fields == null ? new ArrayList<String>() : fields);
         }
-        final String fullyQualifiedName = SwaggerDocUtil.getParameterType(parameter);
         final String name = (parameter.getName() == null) ? parameter.getIn().toLowerCase() : parameter.getName();
+        final String fullyQualifiedName = SwaggerDocUtil.getParameterType(parameter);
+        final String contentType = ((AbstractParameter) parameter).getContentType();
+
         return Parameter.getNewInstance()
                 .addName(name)
                 .addParameterType(parameter.getIn())
                 .addRequired(parameter.getRequired())
                 .addType(fullyQualifiedName)
-                .addRequiredFields(requiredFields);
+                .addRequiredFields(requiredFields)
+                .addContentType(contentType);
+
     }
 
     private void buildSecurityParameters(final Swagger swagger, final Operation operation, final List<Parameter> parameters) {
