@@ -41,6 +41,7 @@ import com.wavemaker.tools.apidocs.tools.core.model.parameters.AbstractParameter
  */
 public class ServiceDefGenerator {
 
+    public static final int PARAMETERS_DEPTH = 1;
     private final ServiceDefPropertiesAdapter serviceDefPropertiesAdapter = new ServiceDefPropertiesAdapter();
 
     private final Swagger swagger;
@@ -126,6 +127,7 @@ public class ServiceDefGenerator {
                                                                final String httpMethod, final String relativePath,
                                                                final String directPath) {
         List<Parameter> parameters = buildParameters(swagger, operation);
+        Map<String, List<Parameter>> definitions = buildDefinitions(swagger, operation);
         RuntimeProxySettings proxySettings = getProxySettings(swagger);
         return WMServiceOperationInfo.getNewInstance()
                 .addName(operation.getMethodName())
@@ -136,7 +138,27 @@ public class ServiceDefGenerator {
                 .addProduces(operation.getProduces())
                 .addMethodType(httpMethod)
                 .addParameters(parameters)
+                .addDefinitions(definitions)
                 .addProxySettings(proxySettings);
+
+    }
+
+    private Map<String, List<Parameter>> buildDefinitions(final Swagger swagger, final Operation operation) {
+        Map<String, List<Parameter>> definitions = new HashMap<>();
+        for (com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter : operation.getParameters()) {
+            buildDefinitions(swagger, parameter, definitions);
+        }
+        return definitions;
+    }
+
+    private void buildDefinitions(final Swagger swagger, final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter, final Map<String, List<Parameter>> definitions) {
+        final ServiceDefDefinitionsAdapter serviceDefDefinitionsAdapter = new ServiceDefDefinitionsAdapter(swagger, new ServiceDefParameterCriteria() {
+            @Override
+            public boolean meetCriteria(final Parameter parameter) {
+                return true;
+            }
+        });
+        definitions.putAll(serviceDefDefinitionsAdapter.adaptToDefinitions(parameter, PARAMETERS_DEPTH));
     }
 
     private RuntimeProxySettings getProxySettings(final Swagger swagger) {
@@ -159,13 +181,8 @@ public class ServiceDefGenerator {
     }
 
     private Parameter buildParameter(final Swagger swagger, final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter) {
-        List<String> requiredFields = new ArrayList<>();
-        if (ParameterType.BODY.name().equals(parameter.getIn().toUpperCase())) {
-            final List<String> fields = serviceDefPropertiesAdapter.adaptToRequiredFields(swagger, parameter);
-            requiredFields.addAll(fields == null ? new ArrayList<String>() : fields);
-        }
-        final String name = (parameter.getName() == null) ? parameter.getIn().toLowerCase() : parameter.getName();
         final String fullyQualifiedName = SwaggerDocUtil.getParameterType(parameter);
+        final String name = (parameter.getName() == null) ? parameter.getIn().toLowerCase() : parameter.getName();
         final String contentType = ((AbstractParameter) parameter).getContentType();
 
         return Parameter.getNewInstance()
@@ -173,9 +190,7 @@ public class ServiceDefGenerator {
                 .addParameterType(parameter.getIn())
                 .addRequired(parameter.getRequired())
                 .addType(fullyQualifiedName)
-                .addRequiredFields(requiredFields)
                 .addContentType(contentType);
-
     }
 
     private void buildSecurityParameters(final Swagger swagger, final Operation operation, final List<Parameter> parameters) {
