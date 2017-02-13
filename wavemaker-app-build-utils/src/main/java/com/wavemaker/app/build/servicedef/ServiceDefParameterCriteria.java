@@ -8,5 +8,5 @@ import com.wavemaker.commons.servicedef.model.Parameter;
  */
 public interface ServiceDefParameterCriteria {
 
-    public boolean meetCriteria(Parameter parameter);
+    boolean meetCriteria(Parameter parameter);
 }

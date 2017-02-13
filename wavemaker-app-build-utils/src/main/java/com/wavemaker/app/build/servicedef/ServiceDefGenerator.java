@@ -15,14 +15,14 @@
  */
 package com.wavemaker.app.build.servicedef;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 import com.wavemaker.app.build.adapter.ServiceDefPropertiesAdapter;
 import com.wavemaker.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.commons.OperationNotExistException;
+import com.wavemaker.commons.json.JSONUtils;
 import com.wavemaker.commons.servicedef.model.Parameter;
 import com.wavemaker.commons.servicedef.model.RuntimeProxySettings;
 import com.wavemaker.commons.servicedef.model.ServiceDefinition;
@@ -127,7 +127,7 @@ public class ServiceDefGenerator {
                                                                final String httpMethod, final String relativePath,
                                                                final String directPath) {
         List<Parameter> parameters = buildParameters(swagger, operation);
-        Map<String, List<Parameter>> definitions = buildDefinitions(swagger, operation);
+        Map<String, Set<Parameter>> definitions = buildDefinitions(swagger, operation);
         RuntimeProxySettings proxySettings = getProxySettings(swagger);
         return WMServiceOperationInfo.getNewInstance()
                 .addName(operation.getMethodName())
@@ -143,15 +143,15 @@ public class ServiceDefGenerator {
 
     }
 
-    private Map<String, List<Parameter>> buildDefinitions(final Swagger swagger, final Operation operation) {
-        Map<String, List<Parameter>> definitions = new HashMap<>();
+    private Map<String, Set<Parameter>> buildDefinitions(final Swagger swagger, final Operation operation) {
+        Map<String, Set<Parameter>> definitions = new HashMap<>();
         for (com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter : operation.getParameters()) {
             buildDefinitions(swagger, parameter, definitions);
         }
         return definitions;
     }
 
-    private void buildDefinitions(final Swagger swagger, final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter, final Map<String, List<Parameter>> definitions) {
+    private void buildDefinitions(final Swagger swagger, final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter, final Map<String, Set<Parameter>> definitions) {
         final ServiceDefDefinitionsAdapter serviceDefDefinitionsAdapter = new ServiceDefDefinitionsAdapter(swagger, new ServiceDefParameterCriteria() {
             @Override
             public boolean meetCriteria(final Parameter parameter) {
@@ -225,6 +225,18 @@ public class ServiceDefGenerator {
             swaggerBasePath = swaggerBasePath.substring(0, swaggerBasePath.length() - 1);
         }
         return swaggerBasePath + pathBasePath + path.getRelativePath();
+    }
+
+    public static void main(String[] args) throws OperationNotExistException, ServiceDefGenerationException {
+        File file = new File("/home/sunilp/Softwares/studio_setup/workspace/saas/users/j44nsmxt39/workspace/default/projects/T1/services/MyJavaService/designtime/MyJavaService_API.json");
+        try {
+            final Swagger swagger = JSONUtils.toObject(file, Swagger.class);
+            ServiceDefGenerator serviceDefGenerator = new ServiceDefGenerator(swagger);
+            final ServiceDefinition myJavaController_sampleJavaOperation = serviceDefGenerator.generate("MyJavaController_sampleJavaOperation");
+            System.out.println(myJavaController_sampleJavaOperation);
+        } catch (IOException e) {
+
+        }
     }
 
 }
