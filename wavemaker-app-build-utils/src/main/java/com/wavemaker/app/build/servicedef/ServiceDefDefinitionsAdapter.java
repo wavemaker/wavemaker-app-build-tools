@@ -1,9 +1,6 @@
 package com.wavemaker.app.build.servicedef;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.wavemaker.app.build.swaggerdoc.handler.PropertyHandler;
 import com.wavemaker.tools.apidocs.tools.core.model.*;
@@ -21,14 +18,14 @@ public class ServiceDefDefinitionsAdapter {
 
     private final Swagger swagger;
     private final ServiceDefParameterCriteria criteria;
-    Map<String, List<com.wavemaker.commons.servicedef.model.Parameter>> parameters = new HashMap<>();
+    Map<String, Set<com.wavemaker.commons.servicedef.model.Parameter>> parameters = new HashMap<>();
 
     public ServiceDefDefinitionsAdapter(final Swagger swagger, final ServiceDefParameterCriteria criteria) {
         this.swagger = swagger;
         this.criteria = criteria;
     }
 
-    public Map<String, List<com.wavemaker.commons.servicedef.model.Parameter>> adaptToDefinitions(final Parameter parameter, final int depth) {
+    public Map<String, Set<com.wavemaker.commons.servicedef.model.Parameter>> adaptToDefinitions(final Parameter parameter, final int depth) {
         final Map<String, Model> definitions = swagger.getDefinitions();
         if (parameter instanceof BodyParameter) {
             BodyParameter bodyParameter = (BodyParameter) parameter;
@@ -85,46 +82,76 @@ public class ServiceDefDefinitionsAdapter {
 
 
     private void generateFields(final Model model, final int depth) {
-        if (model instanceof ModelImpl) {
-            generateFieldsFromModel(model);
-        } else if (model instanceof ComposedModel) {
-            ComposedModel composedModel = (ComposedModel) model;
-            final List<Model> allOf = composedModel.getAllOf();
-            for (Model eachModel : allOf) {
-                generateFields(eachModel, depth);
-            }
-            final Map<String, Property> properties = composedModel.getProperties();
-            if (properties != null) {
-                for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
-                    final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyEntry.getKey(), propertyEntry.getValue());
-                    addParameter(composedModel.getFullyQualifiedName(), parameter);
-                   /* if (propertyEntry.getValue() instanceof RefProperty) {
-                        handleRefProperty(propertyEntry.getKey(), (RefProperty) propertyEntry.getValue(),depth-1);
-                    }*/
+        if (depth > 0) {
+            if (model instanceof ModelImpl) {
+                generateFieldsFromModel(model,depth);
+            } else if (model instanceof ComposedModel) {
+                ComposedModel composedModel = (ComposedModel) model;
+                final List<Model> allOf = composedModel.getAllOf();
+                for (Model eachModel : allOf) {
+                    generateFields(eachModel, depth);
+                }
+                final Map<String, Property> properties = composedModel.getProperties();
+                if (properties != null) {
+                    for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                        final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyEntry.getKey(), propertyEntry.getValue());
+                        addParameter(composedModel.getFullyQualifiedName(), parameter);
+                        if (propertyEntry.getValue() instanceof RefProperty) {
+                            handleRefProperty(propertyEntry.getKey(), (RefProperty) propertyEntry.getValue(), depth - 1);
+                        } else if (propertyEntry.getValue() instanceof ArrayProperty) {
+                            handleArrayProperty(propertyEntry.getKey(), (ArrayProperty) propertyEntry.getValue(), depth - 1);
+                        }
+                    }
                 }
             }
         }
     }
 
 
-    private void generateFieldsFromModel(Model model) {
+    private void generateFieldsFromModel(Model model, final int depth) {
         ModelImpl actualModel = (ModelImpl) model;
         final Map<String, Property> properties = actualModel.getProperties();
         if (properties != null) {
             for (String propertyName : properties.keySet()) {
                 final Property property = properties.get(propertyName);
-                final PropertyHandler propertyHandler = new PropertyHandler(property, swagger.getDefinitions());
-                if (propertyHandler.isPrimitive()) {
-                    final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyName, property);
-                    addParameter(((ModelImpl) model).getFullyQualifiedName(), parameter);
-                } else if (property instanceof ArrayProperty) {
-                    //handleArrayProperty(actualModel,propertyName, (ArrayProperty) property);
+                final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyName, property);
+                addParameter(actualModel.getFullyQualifiedName(), parameter);
+                if (property instanceof ArrayProperty) {
+                    handleArrayProperty(propertyName,(ArrayProperty) property, depth-1);
                 } else if (property instanceof RefProperty) {
-                    final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyName, property);
-                    RefProperty refProperty = (RefProperty) property;
-                    addParameter(actualModel.getFullyQualifiedName(), parameter);
-                    //handleRefProperty(propertyName, (RefProperty) property, depth);
+                     handleRefProperty(propertyName, (RefProperty) property, depth-1);
                 }
+            }
+        }
+    }
+
+
+    private void handleRefProperty(final String propertyName, final RefProperty property, final int depth) {
+        RefProperty refProperty = property;
+        // TODO this case needs to be handle
+        //this case occurs when property is Object<Object,Object....> eq : Page<Employee>
+        /*List<Property> argProperties = refProperty.getTypeArguments();
+        if (argProperties.size() > 0) {
+            for (Property argProperty : argProperties) {
+                handleProperty(propertyName, argProperty);
+            }
+        }*/
+        final Model model = swagger.getDefinitions().get(((RefProperty) property).getSimpleRef());
+        generateFields(model, depth);
+
+    }
+
+    private void handleArrayProperty(final String propertyName, final ArrayProperty property, final int depth) {
+        //this case occurs what property is List<int> || Set<Emp> || List<User> || Set<String> || ......
+        ArrayProperty arrayProperty = property;
+        boolean isList = arrayProperty.isList();
+        if (isList) {
+            Property argProperty = arrayProperty.getItems();
+            if (argProperty instanceof RefProperty) {
+                // case : List<someObject> or Set<someObject>
+                RefProperty refProperty = (RefProperty) argProperty;
+                final Model refModel = swagger.getDefinitions().get(refProperty.getSimpleRef());
+                generateFields(refModel, depth);
             }
         }
     }
@@ -132,17 +159,23 @@ public class ServiceDefDefinitionsAdapter {
 
     protected com.wavemaker.commons.servicedef.model.Parameter buildParameter(final String name, final Property property) {
         com.wavemaker.commons.servicedef.model.Parameter parameter = new com.wavemaker.commons.servicedef.model.Parameter();
-        PropertyHandler propertyHandler = new PropertyHandler(property, swagger.getDefinitions());
+        String type = property.getType();
+        if (property instanceof RefProperty) {
+            PropertyHandler propertyHandler = new PropertyHandler(property, swagger.getDefinitions());
+            type = propertyHandler.getFullyQualifiedType();
+        }
         parameter.addName(name)
-                .addType(property.getType())
+                .addType(type)
                 .addRequired(property.getRequired());
         return parameter;
     }
 
     protected void addParameter(final String key, final com.wavemaker.commons.servicedef.model.Parameter value) {
         if (!parameters.keySet().contains(key)) {
-            parameters.put(key, new ArrayList<com.wavemaker.commons.servicedef.model.Parameter>());
+            parameters.put(key, new HashSet<com.wavemaker.commons.servicedef.model.Parameter>());
         }
-        parameters.get(key).add(value);
+        if (criteria.meetCriteria(value)) {
+            parameters.get(key).add(value);
+        }
     }
 }
