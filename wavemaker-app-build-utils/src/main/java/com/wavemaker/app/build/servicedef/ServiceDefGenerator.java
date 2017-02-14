@@ -158,7 +158,10 @@ public class ServiceDefGenerator {
                 return true;
             }
         });
-        definitions.putAll(serviceDefDefinitionsAdapter.adaptToDefinitions(parameter, PARAMETERS_DEPTH));
+        final Map<String, Set<Parameter>> requiredDefinitions = serviceDefDefinitionsAdapter.adaptToDefinitions(parameter, PARAMETERS_DEPTH);
+        if (requiredDefinitions != null) {
+            definitions.putAll(requiredDefinitions);
+        }
     }
 
     private RuntimeProxySettings getProxySettings(final Swagger swagger) {
