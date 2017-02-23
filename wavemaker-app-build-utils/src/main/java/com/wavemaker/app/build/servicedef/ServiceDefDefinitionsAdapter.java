@@ -84,7 +84,7 @@ public class ServiceDefDefinitionsAdapter {
     private void generateFields(final Model model, final int depth) {
         if (depth > 0) {
             if (model instanceof ModelImpl) {
-                generateFieldsFromModel(model,depth);
+                generateFieldsFromModel(model, depth);
             } else if (model instanceof ComposedModel) {
                 ComposedModel composedModel = (ComposedModel) model;
                 final List<Model> allOf = composedModel.getAllOf();
@@ -117,9 +117,9 @@ public class ServiceDefDefinitionsAdapter {
                 final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyName, property);
                 addParameter(actualModel.getFullyQualifiedName(), parameter);
                 if (property instanceof ArrayProperty) {
-                    handleArrayProperty(propertyName,(ArrayProperty) property, depth-1);
+                    handleArrayProperty(propertyName, (ArrayProperty) property, depth - 1);
                 } else if (property instanceof RefProperty) {
-                     handleRefProperty(propertyName, (RefProperty) property, depth-1);
+                    handleRefProperty(propertyName, (RefProperty) property, depth - 1);
                 }
             }
         }
@@ -159,11 +159,8 @@ public class ServiceDefDefinitionsAdapter {
 
     protected com.wavemaker.commons.servicedef.model.Parameter buildParameter(final String name, final Property property) {
         com.wavemaker.commons.servicedef.model.Parameter parameter = new com.wavemaker.commons.servicedef.model.Parameter();
-        String type = property.getType();
-        if (property instanceof RefProperty) {
-            PropertyHandler propertyHandler = new PropertyHandler(property, swagger.getDefinitions());
-            type = propertyHandler.getFullyQualifiedType();
-        }
+        PropertyHandler propertyHandler = new PropertyHandler(property, swagger.getDefinitions());
+        String type = propertyHandler.getFullyQualifiedType();
         parameter.addName(name)
                 .addType(type)
                 .addRequired(property.getRequired());
