@@ -48,12 +48,13 @@ public class PropertyHandler {
     }
 
     public String getFullyQualifiedType() {
-        //have to give fully qualified type for primitive properties as well
-        if (property instanceof RefProperty) {
+        //if type is primitive
+        if (isPrimitive()) {
+            return SwaggerDocUtil.getWrapperPropertyFQType(this.property);
+        } else if (property instanceof RefProperty) {
             String refName = ((RefProperty) property).getSimpleRef();
             return getModelFullyQualifiedName(refName);
-        }
-        if (property instanceof ArrayProperty) {
+        } else if (property instanceof ArrayProperty) {
             boolean isList = isList();
             ArrayProperty arrayProperty = (ArrayProperty) property;
             if (isList && !isArray()) {
