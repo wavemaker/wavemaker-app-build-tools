@@ -89,18 +89,21 @@ public class ServiceDefDefinitionsAdapter {
                 ComposedModel composedModel = (ComposedModel) model;
                 final List<Model> allOf = composedModel.getAllOf();
                 for (Model eachModel : allOf) {
-                    generateFields(eachModel, depth);
-                }
-                final Map<String, Property> properties = composedModel.getProperties();
-                if (properties != null) {
-                    for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
-                        final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyEntry.getKey(), propertyEntry.getValue());
-                        addParameter(composedModel.getFullyQualifiedName(), parameter);
-                        if (propertyEntry.getValue() instanceof RefProperty) {
-                            handleRefProperty(propertyEntry.getKey(), (RefProperty) propertyEntry.getValue(), depth - 1);
-                        } else if (propertyEntry.getValue() instanceof ArrayProperty) {
-                            handleArrayProperty(propertyEntry.getKey(), (ArrayProperty) propertyEntry.getValue(), depth - 1);
+                    if (eachModel instanceof ModelImpl) {
+                        final Map<String, Property> properties = composedModel.getProperties();
+                        if (properties != null) {
+                            for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                                final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyEntry.getKey(), propertyEntry.getValue());
+                                addParameter(composedModel.getFullyQualifiedName(), parameter);
+                                if (propertyEntry.getValue() instanceof RefProperty) {
+                                    handleRefProperty(propertyEntry.getKey(), (RefProperty) propertyEntry.getValue(), depth - 1);
+                                } else if (propertyEntry.getValue() instanceof ArrayProperty) {
+                                    handleArrayProperty(propertyEntry.getKey(), (ArrayProperty) propertyEntry.getValue(), depth - 1);
+                                }
+                            }
                         }
+                    } else {
+                        generateFields(eachModel, depth);
                     }
                 }
             }
