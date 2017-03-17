@@ -11,6 +11,7 @@
     <modules>
         <module>wavemaker-app-build-utils</module>
         <module>wavemaker-app-build-maven-plugin</module>
+        <module>wavemaker-app-package-maven-plugin</module>
     </modules>
 
     <properties>
