@@ -37,16 +37,16 @@ public class ProjectPackageHandler {
     }
 
     public InputStream pack(Callable<Void> callback) {
-            List<String> ignorePatterns = readIgnorePatterns();
-            addExtraIgnorePatterns(ignorePatterns);
+        List<String> ignorePatterns = readIgnorePatterns();
+        addExtraIgnorePatterns(ignorePatterns);
 
-            String antPatterns[] = new String[ignorePatterns.size()];
-            ignorePatterns.toArray(antPatterns);
+        String antPatterns[] = new String[ignorePatterns.size()];
+        ignorePatterns.toArray(antPatterns);
 
         try {
             Folder targetDir = appPackageConfig.getTargetDir();
             if (targetDir.exists()) {
-                FileUtils.cleanDirectory(((LocalFolder)targetDir).getLocalFile());
+                FileUtils.cleanDirectory(((LocalFolder) targetDir).getLocalFile());
             }
             ResourceFilter excludeFilter = FilterOn.antPattern(antPatterns);
             appPackageConfig.getBasedir().find().files().exclude(excludeFilter).copyTo(targetDir);
@@ -54,7 +54,7 @@ public class ProjectPackageHandler {
             callback.call();
 
             java.io.File zipFile = createTempZipFile();
-            compressToZip(((LocalFolder)targetDir).getLocalFile(), zipFile);
+            compressToZip(((LocalFolder) targetDir).getLocalFile(), zipFile);
 
             return new FileInputStream(zipFile);
         } catch (Exception e) {
@@ -75,6 +75,10 @@ public class ProjectPackageHandler {
             BufferedReader br = null;
             try {
                 File ignoreFile = appPackageConfig.getBasedir().getFile(appPackageConfig.getIgnorePatternFile());
+                if (!ignoreFile.exists()) {
+                    LOGGER.error("{} not found at location {}", appPackageConfig.getIgnorePatternFile(), appPackageConfig.getBasedir());
+                    throw new WMRuntimeException(appPackageConfig.getIgnorePatternFile() + " not found at location " + appPackageConfig.getBasedir());
+                }
                 br = new BufferedReader(ignoreFile.getContent().asReader());
                 String pattern = null;
                 while ((pattern = br.readLine()) != null) {
