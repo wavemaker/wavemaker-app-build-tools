@@ -4,8 +4,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,6 +19,7 @@ import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.ResourceFilter;
 import com.wavemaker.commons.io.local.LocalFolder;
 import com.wavemaker.commons.util.IOUtils;
+import com.wavemaker.commons.zip.ZipArchive;
 
 
 /**
@@ -54,7 +53,7 @@ public class ProjectPackageHandler {
             callback.call();
 
             java.io.File zipFile = createTempZipFile();
-            compressToZip(((LocalFolder) targetDir).getLocalFile(), zipFile);
+            compressToZip(targetDir, zipFile);
 
             return new FileInputStream(zipFile);
         } catch (Exception e) {
@@ -111,32 +110,15 @@ public class ProjectPackageHandler {
         }
     }
 
-    private void compressToZip(java.io.File sourceDir, java.io.File zipFile) {
-        ZipOutputStream zipOutputStream = null;
+    private void compressToZip(Folder sourceFolder, java.io.File zipFile) {
         try {
-            int prefixLength = sourceDir.getPath().length() + 1;
-            FileOutputStream outputStream = new FileOutputStream(zipFile);
-            zipOutputStream = new ZipOutputStream(outputStream);
-            LOGGER.info("Creating {} from {} ", zipFile, sourceDir);
-            zipFolder(sourceDir, zipOutputStream, prefixLength);
+            InputStream zipInputStream = ZipArchive.compress(sourceFolder.find().files());
+            OutputStream zipOutputStream = new FileOutputStream(zipFile);
+            IOUtils.copy(zipInputStream, zipOutputStream, true, true);
+        } catch (FileNotFoundException e) {
+            throw new WMRuntimeException("FileNotFound " + zipFile.getAbsolutePath(), e);
         } catch (IOException e) {
-            throw new WMRuntimeException("Failed to write into zip file " + zipFile.getAbsolutePath(), e);
-        } finally {
-            IOUtils.closeSilently(zipOutputStream);
-        }
-    }
-
-    private void zipFolder(java.io.File folder, ZipOutputStream zipOutputStream, int prefixLength) throws IOException {
-        for (java.io.File file : folder.listFiles()) {
-            if (file.isFile()) {
-                ZipEntry zipEntry = new ZipEntry(file.getPath().substring(prefixLength));
-                zipOutputStream.putNextEntry(zipEntry);
-                FileInputStream fileInputStream = new FileInputStream(file);
-                IOUtils.copy(fileInputStream, zipOutputStream, true, false);
-                zipOutputStream.closeEntry();
-            } else if (file.isDirectory()) {
-                zipFolder(file, zipOutputStream, prefixLength);
-            }
+            throw new WMRuntimeException(e);
         }
     }
 }
