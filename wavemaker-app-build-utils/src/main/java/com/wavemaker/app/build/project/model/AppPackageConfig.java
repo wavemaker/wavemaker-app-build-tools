@@ -10,7 +10,6 @@ import com.wavemaker.commons.io.Folder;
 public class AppPackageConfig {
 
     private Folder basedir;
-    private Folder targetDir;
     private String ignorePatternFile;
     private List<String> extraIgnorePatterns;
 
@@ -18,9 +17,6 @@ public class AppPackageConfig {
         return basedir;
     }
 
-    public Folder getTargetDir() {
-        return targetDir;
-    }
 
     public String getIgnorePatternFile() {
         return ignorePatternFile;
@@ -32,7 +28,6 @@ public class AppPackageConfig {
 
     private AppPackageConfig(Builder builder) {
         this.basedir = builder.basedir;
-        this.targetDir = builder.targetDir;
         this.ignorePatternFile = builder.ignorePatternFile;
         this.extraIgnorePatterns = builder.extraIgnorePatterns;
     }
@@ -40,7 +35,6 @@ public class AppPackageConfig {
     public static class Builder {
 
         private Folder basedir;
-        private Folder targetDir;
         private String ignorePatternFile;
         private List<String> extraIgnorePatterns;
 
@@ -49,11 +43,6 @@ public class AppPackageConfig {
 
         public Builder basedir(Folder basedir) {
             this.basedir = basedir;
-            return this;
-        }
-
-        public Builder targetDir(Folder targetDir) {
-            this.targetDir = targetDir;
             return this;
         }
 
@@ -76,11 +65,6 @@ public class AppPackageConfig {
             if (basedir == null || !basedir.exists()) {
                 throw new IllegalStateException("BaseDir is mandatory to build AppPackageConfig");
             }
-
-            if (targetDir == null || !targetDir.exists()) {
-                throw new IllegalStateException("TargetDir is mandatory to build AppPackageConfig");
-            }
-
 
         }
     }

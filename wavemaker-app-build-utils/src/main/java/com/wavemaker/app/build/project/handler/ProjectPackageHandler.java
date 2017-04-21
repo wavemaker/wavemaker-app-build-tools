@@ -3,7 +3,6 @@ package com.wavemaker.app.build.project.handler;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +12,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.wavemaker.app.build.project.model.AppPackageConfig;
 import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.DeleteTempFileOnCloseInputStream;
 import com.wavemaker.commons.io.File;
 import com.wavemaker.commons.io.FilterOn;
 import com.wavemaker.commons.io.Folder;
@@ -35,29 +35,34 @@ public class ProjectPackageHandler {
         this.appPackageConfig = appPackageConfig;
     }
 
-    public InputStream pack(Callable<Void> callback) {
+    public InputStream pack(CustomProjectPackageHandlerCallback customProjectPackageHandlerCallback) {
         List<String> ignorePatterns = readIgnorePatterns();
         addExtraIgnorePatterns(ignorePatterns);
 
         String antPatterns[] = new String[ignorePatterns.size()];
         ignorePatterns.toArray(antPatterns);
 
+        java.io.File tempDirectory = null;
         try {
-            Folder targetDir = appPackageConfig.getTargetDir();
-            if (targetDir.exists()) {
-                FileUtils.cleanDirectory(((LocalFolder) targetDir).getLocalFile());
+            tempDirectory = IOUtils.createTempDirectory();
+            Folder packageFolder = new LocalFolder(tempDirectory);
+            if (packageFolder.exists()) {
+                FileUtils.cleanDirectory(((LocalFolder) packageFolder).getLocalFile());
             }
             ResourceFilter excludeFilter = FilterOn.antPattern(antPatterns);
-            appPackageConfig.getBasedir().find().files().exclude(excludeFilter).copyTo(targetDir);
+            appPackageConfig.getBasedir().find().files().exclude(excludeFilter).copyTo(packageFolder);
 
-            callback.call();
+            if (customProjectPackageHandlerCallback != null) {
+                customProjectPackageHandlerCallback.doPackage(packageFolder);
+            }
 
-            java.io.File zipFile = createTempZipFile();
-            compressToZip(targetDir, zipFile);
-
-            return new FileInputStream(zipFile);
+            java.io.File zipFile = java.io.File.createTempFile("projectExport", ".zip");
+            compressToZip(packageFolder, zipFile);
+            return new DeleteTempFileOnCloseInputStream(zipFile);
         } catch (Exception e) {
             throw new WMRuntimeException(e);
+        } finally {
+            IOUtils.deleteDirectorySilently(tempDirectory);
         }
     }
 
@@ -99,17 +104,6 @@ public class ProjectPackageHandler {
         return ignorePatterns;
     }
 
-
-    private java.io.File createTempZipFile() {
-        try {
-            String filename = ((LocalFolder) appPackageConfig.getBasedir()).getLocalFile().getName();
-            java.io.File zipDirectory = IOUtils.createTempDirectory(filename, "exportZip");
-            return new java.io.File(zipDirectory.getAbsolutePath(), filename + ".zip");
-        } catch (IOException e) {
-            throw new WMRuntimeException(e);
-        }
-    }
-
     private void compressToZip(Folder sourceFolder, java.io.File zipFile) {
         try {
             InputStream zipInputStream = ZipArchive.compress(sourceFolder.find().files());
@@ -119,6 +113,15 @@ public class ProjectPackageHandler {
             throw new WMRuntimeException("FileNotFound " + zipFile.getAbsolutePath(), e);
         } catch (IOException e) {
             throw new WMRuntimeException(e);
+        }
+    }
+
+    public interface CustomProjectPackageHandlerCallback {
+        void doPackage(Folder packageFolder) throws Exception;
+    }
+
+    public static class NoOpProjectPackageHandlerCallback implements CustomProjectPackageHandlerCallback {
+        public void doPackage(Folder packageFolder) {
         }
     }
 }

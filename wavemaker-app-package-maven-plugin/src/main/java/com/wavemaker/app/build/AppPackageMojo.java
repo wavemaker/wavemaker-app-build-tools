@@ -2,7 +2,6 @@ package com.wavemaker.app.build;
 
 import java.io.*;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -44,24 +43,18 @@ public class AppPackageMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         Folder baseFolder = new LocalFolder(basedir);
-        File tempDir = createTempDirectory();
 
         AppPackageConfig appPackageConfig = new AppPackageConfig.Builder()
                 .basedir(baseFolder)
-                .targetDir(new LocalFolder(tempDir))
                 .ignorePatternFile(ignorePatternFile)
                 .extraIgnorePatterns(extraIgnorePatterns).build();
 
         File zipFile = null;
+        InputStream inputStream = null;
         try {
             ProjectPackageHandler projectPackageHandler = new ProjectPackageHandler(appPackageConfig);
 
-            InputStream inputStream = projectPackageHandler.pack(new Callable<Void>() {
-                @Override
-                public Void call() throws Exception {
-                    return null;
-                }
-            });
+            inputStream = projectPackageHandler.pack(new ProjectPackageHandler.NoOpProjectPackageHandlerCallback());
 
             zipFile = createZipFile();
             getLog().info("Creating " + zipFile + " from the " + basedir);
@@ -71,7 +64,7 @@ public class AppPackageMojo extends AbstractMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Failed copy to zip file " + zipFile, e);
         } finally {
-            IOUtils.deleteDirectorySilently(tempDir);
+            IOUtils.closeSilently(inputStream);
         }
     }
 
