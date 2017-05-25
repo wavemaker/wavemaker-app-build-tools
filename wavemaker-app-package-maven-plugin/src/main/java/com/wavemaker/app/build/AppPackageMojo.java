@@ -27,7 +27,7 @@ public class AppPackageMojo extends AbstractMojo {
     @Parameter(name = "basedir", readonly = true, defaultValue = "${basedir}")
     private String basedir;
 
-    @Parameter(name = "targetDir", defaultValue = "target/export")
+    @Parameter(name = "targetDir", defaultValue = "${basedir}/target/export")
     private String targetDir;
 
     @Parameter(name = "projectName", defaultValue = "${project.name}")
