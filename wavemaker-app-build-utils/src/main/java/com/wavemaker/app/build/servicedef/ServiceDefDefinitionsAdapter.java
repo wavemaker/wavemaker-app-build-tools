@@ -5,6 +5,7 @@ import java.util.*;
 import com.wavemaker.app.build.swaggerdoc.handler.PropertyHandler;
 import com.wavemaker.tools.apidocs.tools.core.model.*;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.BodyParameter;
+import com.wavemaker.tools.apidocs.tools.core.model.parameters.FormParameter;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter;
 import com.wavemaker.tools.apidocs.tools.core.model.properties.ArrayProperty;
 import com.wavemaker.tools.apidocs.tools.core.model.properties.Property;
@@ -27,9 +28,13 @@ public class ServiceDefDefinitionsAdapter {
 
     public Map<String, Set<com.wavemaker.commons.servicedef.model.Parameter>> adaptToDefinitions(final Parameter parameter, final int depth) {
         final Map<String, Model> definitions = swagger.getDefinitions();
-        if (parameter instanceof BodyParameter) {
-            BodyParameter bodyParameter = (BodyParameter) parameter;
-            Model model = bodyParameter.getSchema();
+        if (parameter instanceof BodyParameter || parameter instanceof FormParameter) {
+            Model model;
+            if(parameter instanceof FormParameter) {
+                model = ((FormParameter) parameter).getSchema();
+            }else {
+                model = ((BodyParameter)parameter).getSchema();
+            }
             if (model instanceof RefModel) {
                 // when body is Object or Object<Object>
                 RefModel refModel = (RefModel) model;
