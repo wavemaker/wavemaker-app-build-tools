@@ -1,9 +1,18 @@
 package com.wavemaker.app.build.servicedef;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.wavemaker.app.build.swaggerdoc.handler.PropertyHandler;
-import com.wavemaker.tools.apidocs.tools.core.model.*;
+import com.wavemaker.tools.apidocs.tools.core.model.ArrayModel;
+import com.wavemaker.tools.apidocs.tools.core.model.ComposedModel;
+import com.wavemaker.tools.apidocs.tools.core.model.Model;
+import com.wavemaker.tools.apidocs.tools.core.model.ModelImpl;
+import com.wavemaker.tools.apidocs.tools.core.model.RefModel;
+import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.BodyParameter;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.FormParameter;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter;
@@ -171,7 +180,8 @@ public class ServiceDefDefinitionsAdapter {
         String type = propertyHandler.getFullyQualifiedType();
         parameter.addName(name)
                 .addType(type)
-                .addRequired(property.getRequired());
+                .addRequired(property.getRequired())
+                .addReadOnly(property.getReadOnly());
         return parameter;
     }
 
