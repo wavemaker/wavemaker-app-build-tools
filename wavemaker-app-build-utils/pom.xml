@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.wavemaker.app.build</groupId>
         <artifactId>wavemaker-app-build-tools</artifactId>
-        <version>8.3.4</version>
+        <version>8.5.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,7 +16,7 @@
         <dependency>
             <groupId>com.wavemaker.commons</groupId>
             <artifactId>wavemaker-commons-util</artifactId>
-            <version>8.3.4</version>
+            <version>8.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.wavemaker.tools.apidocs</groupId>
