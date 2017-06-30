@@ -51,20 +51,23 @@ public class AppPackageMojo extends AbstractMojo {
 
         File zipFile = null;
         InputStream inputStream = null;
+        OutputStream outputStream = null;
         try {
             ProjectPackageHandler projectPackageHandler = new ProjectPackageHandler(appPackageConfig);
 
             inputStream = projectPackageHandler.pack(new ProjectPackageHandler.NoOpProjectPackageHandlerCallback());
 
             zipFile = createZipFile();
+            outputStream = new FileOutputStream(zipFile);
             getLog().info("Creating " + zipFile + " from the " + basedir);
-            IOUtils.copy(inputStream, new FileOutputStream(zipFile), true, true);
+            IOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             throw new MojoExecutionException("File not found " + zipFile, e);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed copy to zip file " + zipFile, e);
         } finally {
             IOUtils.closeSilently(inputStream);
+            IOUtils.closeSilently(outputStream);
         }
     }
 
