@@ -39,10 +39,7 @@ import org.apache.maven.shared.filtering.MavenResourcesExecution;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import com.wavemaker.app.build.maven.plugin.handler.AppBuildHandler;
-import com.wavemaker.app.build.maven.plugin.handler.PageMinFileGenerationHandler;
-import com.wavemaker.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
-import com.wavemaker.app.build.maven.plugin.handler.VariableServiceDefGenerationHandler;
+import com.wavemaker.app.build.maven.plugin.handler.*;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.local.LocalFolder;
@@ -62,7 +59,7 @@ public class AppBuildMojo extends AbstractMojo {
 
     @Parameter(property = "basedir", required = true, readonly = true)
     private String baseDirectory;
-    ;
+
 
     @Parameter(name = "pages-directory", defaultValue = "src/main/webapp/pages/")
     private String pagesDirectory;
@@ -70,8 +67,14 @@ public class AppBuildMojo extends AbstractMojo {
     @Parameter(name = "services-directory", defaultValue = "services")
     private String servicesDirectory;
 
+    @Parameter(name = "locale-directory", defaultValue = "i18n")
+    private String localeDirectory;
+
     @Parameter(name = "outputDirectory", defaultValue = "target/classes")
     private String outputDirectory;
+
+    @Parameter(name = "localeOutputDirectory", defaultValue = "src/main/webapp/WEB-INF/i18n/")
+    private String localeOutputDirectory;
 
     @Parameter(defaultValue = "${session}")
     private MavenSession session;
@@ -120,6 +123,12 @@ public class AppBuildMojo extends AbstractMojo {
                 URL[] runtimeClasspathElements = getRuntimeClasspathElements();
                 appBuildHandlers.add(new SwaggerDocGenerationHandler(servicesFolder, runtimeClasspathElements));
                 appBuildHandlers.add(new VariableServiceDefGenerationHandler(rootFolder));
+            }
+
+            Folder localeFolder = rootFolder.getFolder(localeDirectory);
+            Folder localeOutputFolder = rootFolder.getFolder(localeOutputDirectory);
+            if (localeFolder.exists()) {
+                appBuildHandlers.add(new LocaleMessagesGenerationHandler(localeFolder, localeOutputFolder));
             }
         }
     }

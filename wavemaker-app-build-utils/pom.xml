@@ -16,7 +16,7 @@
         <dependency>
             <groupId>com.wavemaker.commons</groupId>
             <artifactId>wavemaker-commons-util</artifactId>
-            <version>9.0</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.wavemaker.tools.apidocs</groupId>
