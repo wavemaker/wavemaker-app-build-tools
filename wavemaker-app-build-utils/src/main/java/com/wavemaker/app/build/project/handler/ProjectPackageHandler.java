@@ -35,17 +35,29 @@ public class ProjectPackageHandler {
         this.appPackageConfig = appPackageConfig;
     }
 
-    public InputStream pack(CustomProjectPackageHandlerCallback customProjectPackageHandlerCallback) {
+    public InputStream exportAsZipInputStream(CustomProjectPackageHandlerCallback customProjectPackageHandlerCallback) {
+        Folder packageFolder = null;
+        try {
+            packageFolder = IOUtils.createTempFolder();
+            exportIntoFolder(customProjectPackageHandlerCallback, packageFolder);
+
+            java.io.File zipFile = java.io.File.createTempFile("projectExport", ".zip");
+            compressToZip(packageFolder, zipFile);
+            return new DeleteTempFileOnCloseInputStream(zipFile);
+        } catch (Exception e) {
+            throw new WMRuntimeException(e);
+        } finally {
+            IOUtils.deleteDirectorySilently(((LocalFolder) packageFolder).getLocalFile());
+        }
+    }
+
+    public void exportIntoFolder(CustomProjectPackageHandlerCallback customProjectPackageHandlerCallback, Folder packageFolder) {
         List<String> ignorePatterns = readIgnorePatterns();
         addExtraIgnorePatterns(ignorePatterns);
 
         String antPatterns[] = new String[ignorePatterns.size()];
         ignorePatterns.toArray(antPatterns);
-
-        java.io.File tempDirectory = null;
         try {
-            tempDirectory = IOUtils.createTempDirectory();
-            Folder packageFolder = new LocalFolder(tempDirectory);
             if (packageFolder.exists()) {
                 FileUtils.cleanDirectory(((LocalFolder) packageFolder).getLocalFile());
             }
@@ -55,14 +67,8 @@ public class ProjectPackageHandler {
             if (customProjectPackageHandlerCallback != null) {
                 customProjectPackageHandlerCallback.doPackage(packageFolder);
             }
-
-            java.io.File zipFile = java.io.File.createTempFile("projectExport", ".zip");
-            compressToZip(packageFolder, zipFile);
-            return new DeleteTempFileOnCloseInputStream(zipFile);
         } catch (Exception e) {
             throw new WMRuntimeException(e);
-        } finally {
-            IOUtils.deleteDirectorySilently(tempDirectory);
         }
     }
 

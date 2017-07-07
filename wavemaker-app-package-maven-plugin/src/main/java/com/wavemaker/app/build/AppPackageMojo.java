@@ -55,7 +55,7 @@ public class AppPackageMojo extends AbstractMojo {
         try {
             ProjectPackageHandler projectPackageHandler = new ProjectPackageHandler(appPackageConfig);
 
-            inputStream = projectPackageHandler.pack(new ProjectPackageHandler.NoOpProjectPackageHandlerCallback());
+            inputStream = projectPackageHandler.exportAsZipInputStream(new ProjectPackageHandler.NoOpProjectPackageHandlerCallback());
 
             zipFile = createZipFile();
             outputStream = new FileOutputStream(zipFile);
@@ -68,15 +68,6 @@ public class AppPackageMojo extends AbstractMojo {
         } finally {
             IOUtils.closeSilently(inputStream);
             IOUtils.closeSilently(outputStream);
-        }
-    }
-
-
-    private File createTempDirectory() throws MojoExecutionException {
-        try {
-            return IOUtils.createTempDirectory();
-        } catch (IOException e) {
-            throw new MojoExecutionException("Failed to create temp directory", e);
         }
     }
 
