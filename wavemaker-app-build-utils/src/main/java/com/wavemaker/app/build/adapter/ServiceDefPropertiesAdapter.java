@@ -6,7 +6,10 @@ import java.util.Map;
 
 import com.wavemaker.app.build.swaggerdoc.handler.ModelHandler;
 import com.wavemaker.app.build.swaggerdoc.handler.PropertyHandler;
-import com.wavemaker.tools.apidocs.tools.core.model.*;
+import com.wavemaker.tools.apidocs.tools.core.model.ArrayModel;
+import com.wavemaker.tools.apidocs.tools.core.model.Model;
+import com.wavemaker.tools.apidocs.tools.core.model.RefModel;
+import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.BodyParameter;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter;
 import com.wavemaker.tools.apidocs.tools.core.model.properties.ArrayProperty;

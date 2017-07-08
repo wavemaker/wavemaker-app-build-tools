@@ -106,7 +106,7 @@ public class AppBuildMojo extends AbstractMojo {
 
     private void initializeHandlers() throws MojoFailureException {
         if (appBuildHandlers == null) {
-            appBuildHandlers = new ArrayList<AppBuildHandler>();
+            appBuildHandlers = new ArrayList<>();
             Folder rootFolder = new LocalFolder(baseDirectory);
 
             Folder pagesFolder = rootFolder.getFolder(pagesDirectory);

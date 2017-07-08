@@ -38,8 +38,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.wavemaker.app.build.servicedef.ServiceDefGenerator;
 import com.wavemaker.app.build.exception.ServiceDefGenerationException;
+import com.wavemaker.app.build.servicedef.ServiceDefGenerator;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.File;
 import com.wavemaker.commons.io.FilterOn;
@@ -129,7 +129,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
             logger.error("Swagger File does not exist for service {}", serviceFolder.getName());
         }
         try {
-            return swagger != null ? new ServiceDefGenerator(swagger).generate() : new HashMap<String, ServiceDefinition>();
+            return swagger != null ? new ServiceDefGenerator(swagger).generate() : new HashMap<>();
         } catch (ServiceDefGenerationException e) {
             throw new WMRuntimeException("Failed to build service def for service " + swagger.getInfo().getServiceId(), e);
         }
@@ -214,7 +214,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
                 }
                 synchronized (filteredServiceDefinitions) {
                     if (!filteredServiceDefinitions.containsKey(service)) {
-                        filteredServiceDefinitions.put(service, new ConcurrentHashMap<String, ServiceDefinition>());
+                        filteredServiceDefinitions.put(service, new ConcurrentHashMap<>());
                     }
                 }
                 final Map<String, ServiceDefinition> serviceDefinitions = serviceVsServiceDefs.get(service).get();

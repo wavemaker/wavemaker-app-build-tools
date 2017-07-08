@@ -187,7 +187,7 @@ public class ServiceDefDefinitionsAdapter {
 
     protected void addParameter(final String key, final com.wavemaker.commons.servicedef.model.Parameter value) {
         if (!parameters.keySet().contains(key)) {
-            parameters.put(key, new HashSet<com.wavemaker.commons.servicedef.model.Parameter>());
+            parameters.put(key, new HashSet<>());
         }
         if (criteria.meetCriteria(value)) {
             parameters.get(key).add(value);

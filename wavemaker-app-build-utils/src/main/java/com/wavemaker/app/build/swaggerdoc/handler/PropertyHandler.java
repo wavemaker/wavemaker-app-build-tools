@@ -1,6 +1,10 @@
 package com.wavemaker.app.build.swaggerdoc.handler;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.wavemaker.commons.swaggerdoc.util.SwaggerDocUtil;
 import com.wavemaker.tools.apidocs.tools.core.model.AbstractModel;

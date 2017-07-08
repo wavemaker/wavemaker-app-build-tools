@@ -17,7 +17,11 @@ package com.wavemaker.app.build.servicedef;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import com.wavemaker.app.build.adapter.ServiceDefPropertiesAdapter;
 import com.wavemaker.app.build.exception.ServiceDefGenerationException;
@@ -31,7 +35,11 @@ import com.wavemaker.commons.swaggerdoc.constants.WebSwaggerConstants;
 import com.wavemaker.commons.swaggerdoc.handler.OperationHandler;
 import com.wavemaker.commons.swaggerdoc.handler.PathHandler;
 import com.wavemaker.commons.swaggerdoc.util.SwaggerDocUtil;
-import com.wavemaker.tools.apidocs.tools.core.model.*;
+import com.wavemaker.tools.apidocs.tools.core.model.Info;
+import com.wavemaker.tools.apidocs.tools.core.model.Operation;
+import com.wavemaker.tools.apidocs.tools.core.model.Path;
+import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
+import com.wavemaker.tools.apidocs.tools.core.model.VendorUtils;
 import com.wavemaker.tools.apidocs.tools.core.model.auth.SecuritySchemeDefinition;
 import com.wavemaker.tools.apidocs.tools.core.model.parameters.AbstractParameter;
 
