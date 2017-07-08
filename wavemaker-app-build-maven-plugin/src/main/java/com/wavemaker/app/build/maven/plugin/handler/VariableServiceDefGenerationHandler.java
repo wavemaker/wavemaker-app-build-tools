@@ -170,11 +170,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         V v = null;
         try {
             v = future.get();
-        } catch (CancellationException ce) {
-            t = ce;
-        } catch (ExecutionException ee) {
-            t = ee;
-        } catch (InterruptedException e) {
+        } catch (CancellationException | InterruptedException | ExecutionException e) {
             t = e;
         }
         if (t != null) {

@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -115,9 +116,9 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
     private String getBasePackageName(final Folder serviceFolder) {
         final File serviceDefXML = serviceFolder.getFolder(DESIGN_TIME_FOLDER).getFile(SERVICE_DEF_XML);
         String serviceType = findServiceType(serviceDefXML);
-        if (serviceType != null && serviceType.equals(SECURITY_SERVICE_TYPE)) {
+        if (Objects.equals(serviceType, SECURITY_SERVICE_TYPE)) {
             return SECURITY_SERVICE_CONTROLLER_CLAZZ;
-        } else if (serviceType != null && serviceType.equals(FEED_SERVICE_TYPE)) {
+        } else if (Objects.equals(serviceType, FEED_SERVICE_TYPE)) {
             return FEED_SERVICE_CONTROLLER_CLAZZ;
         }
         final BasePackage basePackage = new BasePackage(serviceFolder.getFolder(SRC_FOLDER));

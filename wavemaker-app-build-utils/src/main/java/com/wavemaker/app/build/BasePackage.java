@@ -98,9 +98,9 @@ public class BasePackage {
         boolean emptyPathExists = false;
 
         if (files.size() > 0){
-            for (int i=0; i<files.size(); i++){
+            for (File file : files) {
                 //Check if current folder of file is same as source folder
-                if(StringUtils.isBlank(files.get(i).getParent().toStringRelativeTo(sourceFolder))){
+                if (StringUtils.isBlank(file.getParent().toStringRelativeTo(sourceFolder))) {
                     emptyPathExists = true;
                     break;
                 }
