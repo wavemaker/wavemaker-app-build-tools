@@ -99,12 +99,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
             List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
             if (serviceFolders.size() > 0) {
                 for (final Folder serviceFolder : serviceFolders) {
-                    serviceVsServiceDefs.put(serviceFolder.getName(), executorService.submit(new Callable<Map<String, ServiceDefinition>>() {
-                        @Override
-                        public Map<String, ServiceDefinition> call() throws Exception {
-                            return buildServiceDefs(serviceFolder);
-                        }
-                    }));
+                    serviceVsServiceDefs.put(serviceFolder.getName(), executorService.submit(() -> buildServiceDefs(serviceFolder)));
                 }
             }
             for (String service : serviceVsServiceDefs.keySet()) {
@@ -142,16 +137,13 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         Collection<Future> futures = new ArrayList<>();
         try {
             for (final File file : files) {
-                callables.add(new Callable<Object>() {
-                    @Override
-                    public Object call() throws Exception {
-                        try {
-                            generateServiceDefs(file);
-                        } catch (JSONException e) {
-                            logger.error("Failed to build service definitions for variable json file " + file.getName());
-                        }
-                        return this;
+                callables.add(() -> {
+                    try {
+                        generateServiceDefs(file);
+                    } catch (JSONException e) {
+                        logger.error("Failed to build service definitions for variable json file " + file.getName());
                     }
+                    return this;
                 });
             }
             for (Callable callable : callables) {

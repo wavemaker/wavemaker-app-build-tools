@@ -25,7 +25,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.classloader.ResourceClassLoaderUtils;
-import com.wavemaker.commons.classloader.WMCallable;
 import com.wavemaker.tools.apidocs.tools.core.model.Info;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 import com.wavemaker.tools.apidocs.tools.parser.config.SwaggerConfiguration;
@@ -85,17 +84,14 @@ public class SwaggerGenerator {
             builder.setInfo(new Info());
         }
 
-        swagger = ResourceClassLoaderUtils.runInClassLoaderContext(new WMCallable<Swagger>() {
-            @Override
-            public Swagger call() {
-                builder.addParameterResolver(Pageable.class, new PageParameterResolver());
-                builder.addParameterResolver(MultipartFile.class, new MultiPartFileResolver());
-                builder.addParameterResolver(MultipartHttpServletRequest.class, new MultiPartRequestResolver());
-                builder.addParameterResolver(HttpServletRequest.class, new ServletMetaTypesResolver());
-                builder.addParameterResolver(HttpServletResponse.class, new ServletMetaTypesResolver());
-                SwaggerParser swaggerParser = new SpringSwaggerParser(builder.build());
-                return swaggerParser.generate();
-            }
+        swagger = ResourceClassLoaderUtils.runInClassLoaderContext(() -> {
+            builder.addParameterResolver(Pageable.class, new PageParameterResolver());
+            builder.addParameterResolver(MultipartFile.class, new MultiPartFileResolver());
+            builder.addParameterResolver(MultipartHttpServletRequest.class, new MultiPartRequestResolver());
+            builder.addParameterResolver(HttpServletRequest.class, new ServletMetaTypesResolver());
+            builder.addParameterResolver(HttpServletResponse.class, new ServletMetaTypesResolver());
+            SwaggerParser swaggerParser = new SpringSwaggerParser(builder.build());
+            return swaggerParser.generate();
         }, classLoader);
 
         return swagger;
