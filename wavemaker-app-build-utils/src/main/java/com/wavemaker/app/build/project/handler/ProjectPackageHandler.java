@@ -52,7 +52,7 @@ public class ProjectPackageHandler {
         } catch (Exception e) {
             throw new WMRuntimeException(e);
         } finally {
-            IOUtils.deleteDirectorySilently(((LocalFolder) packageFolder).getLocalFile());
+            IOUtils.deleteDirectorySilently(packageFolder);
         }
     }
 
