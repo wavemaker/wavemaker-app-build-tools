@@ -127,9 +127,7 @@ public class AppBuildMojo extends AbstractMojo {
 
             Folder localeFolder = rootFolder.getFolder(localeDirectory);
             Folder localeOutputFolder = rootFolder.getFolder(localeOutputDirectory);
-            if (localeFolder.exists()) {
-                appBuildHandlers.add(new LocaleMessagesGenerationHandler(localeFolder, localeOutputFolder));
-            }
+            appBuildHandlers.add(new LocaleMessagesGenerationHandler(localeFolder, localeOutputFolder));
         }
     }
 

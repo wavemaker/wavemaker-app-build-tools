@@ -24,7 +24,7 @@ import com.wavemaker.commons.json.JSONUtils;
 public final class SystemLocaleContext {
 
     private static String DEFAULT_LOCALE = "en";
-    private static String I18N_DIR = "i18n";
+    private static String SYSTEM_I18N_RESOURCES_DIR = "com/wavemaker/runtime/i18n";
 
     private static List<String> SYSTEM_SUPPORTED_LOCALES;
     private static Cache<String, Map<String, String>> systemMessagesCache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
@@ -40,7 +40,7 @@ public final class SystemLocaleContext {
             synchronized (systemMessagesCache) {
                 systemMessages = systemMessagesCache.getIfPresent(locale);
                 if (systemMessages == null) {
-                    InputStream inputStream = ClassLoaderUtils.getResourceAsStream(I18N_DIR + "/" + locale + ".json");
+                    InputStream inputStream = ClassLoaderUtils.getResourceAsStream(SYSTEM_I18N_RESOURCES_DIR + "/" + locale + ".json");
                     if (inputStream != null) {
                         systemMessages = getSystemLocaleMessages(inputStream);
                         systemMessagesCache.put(locale, systemMessages);
@@ -75,7 +75,7 @@ public final class SystemLocaleContext {
     private static void init() {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources(I18N_DIR + "/*");
+            Resource[] resources = resolver.getResources(SYSTEM_I18N_RESOURCES_DIR + "/*.json");
             for (Resource resource : resources) {
                 String locale = FilenameUtils.removeExtension(resource.getFilename());
                 SYSTEM_SUPPORTED_LOCALES.add(locale);

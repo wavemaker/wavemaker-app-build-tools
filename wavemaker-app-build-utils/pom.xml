@@ -23,6 +23,13 @@
             <artifactId>wavemaker-tools-apidocs-spring</artifactId>
         </dependency>
         <dependency>
+            <!-- TODO adding dependency to get runtime messages, need to fix it-->
+            <groupId>com.wavemaker.runtime</groupId>
+            <artifactId>wavemaker-app-runtime-core</artifactId>
+            <version>${project.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
         </dependency>
