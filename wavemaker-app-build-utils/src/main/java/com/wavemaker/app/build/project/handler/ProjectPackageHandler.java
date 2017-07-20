@@ -23,7 +23,7 @@ import com.wavemaker.commons.io.FilterOn;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.ResourceFilter;
 import com.wavemaker.commons.io.local.LocalFolder;
-import com.wavemaker.commons.util.IOUtils;
+import com.wavemaker.commons.util.WMIOUtils;
 import com.wavemaker.commons.zip.ZipArchive;
 
 
@@ -43,7 +43,7 @@ public class ProjectPackageHandler {
     public InputStream exportAsZipInputStream(CustomProjectPackageHandlerCallback customProjectPackageHandlerCallback) {
         Folder packageFolder = null;
         try {
-            packageFolder = IOUtils.createTempFolder();
+            packageFolder = WMIOUtils.createTempFolder();
             exportIntoFolder(customProjectPackageHandlerCallback, packageFolder);
 
             java.io.File zipFile = java.io.File.createTempFile("projectExport", ".zip");
@@ -52,7 +52,7 @@ public class ProjectPackageHandler {
         } catch (Exception e) {
             throw new WMRuntimeException(e);
         } finally {
-            IOUtils.deleteDirectorySilently(packageFolder);
+            WMIOUtils.deleteDirectorySilently(packageFolder);
         }
     }
 
@@ -107,7 +107,7 @@ public class ProjectPackageHandler {
             } catch (IOException e) {
                 throw new WMRuntimeException(e);
             } finally {
-                IOUtils.closeSilently(br);
+                WMIOUtils.closeSilently(br);
             }
         } else {
             LOGGER.warn("IgnorePatterFile was not provided, it will copy everything to the target");
@@ -121,14 +121,14 @@ public class ProjectPackageHandler {
         try {
             zipInputStream = ZipArchive.compress(sourceFolder.find().files());
             zipOutputStream = new FileOutputStream(zipFile);
-            IOUtils.copy(zipInputStream, zipOutputStream);
+            WMIOUtils.copy(zipInputStream, zipOutputStream);
         } catch (FileNotFoundException e) {
             throw new WMRuntimeException("FileNotFound " + zipFile.getAbsolutePath(), e);
         } catch (IOException e) {
             throw new WMRuntimeException(e);
         } finally {
-            IOUtils.closeSilently(zipInputStream);
-            IOUtils.closeSilently(zipOutputStream);
+            WMIOUtils.closeSilently(zipInputStream);
+            WMIOUtils.closeSilently(zipOutputStream);
         }
     }
 

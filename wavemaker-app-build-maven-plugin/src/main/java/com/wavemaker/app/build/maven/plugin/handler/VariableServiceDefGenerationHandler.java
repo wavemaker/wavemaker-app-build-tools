@@ -47,7 +47,7 @@ import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.Resources;
 import com.wavemaker.commons.json.JSONUtils;
 import com.wavemaker.commons.servicedef.model.ServiceDefinition;
-import com.wavemaker.commons.util.IOUtils;
+import com.wavemaker.commons.util.WMIOUtils;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 
 /**
@@ -255,7 +255,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         } catch (Exception e) {
             throw new WMRuntimeException("Failed to parse swagger file ", e);
         } finally {
-            IOUtils.closeSilently(is);
+            WMIOUtils.closeSilently(is);
         }
     }
 }

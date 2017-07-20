@@ -20,7 +20,7 @@ import com.wavemaker.app.build.project.handler.ProjectPackageHandler;
 import com.wavemaker.app.build.project.model.AppPackageConfig;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.local.LocalFolder;
-import com.wavemaker.commons.util.IOUtils;
+import com.wavemaker.commons.util.WMIOUtils;
 
 /**
  * Created by kishore on 16/3/17.
@@ -65,14 +65,14 @@ public class AppPackageMojo extends AbstractMojo {
             zipFile = createZipFile();
             outputStream = new FileOutputStream(zipFile);
             getLog().info("Creating " + zipFile + " from the " + basedir);
-            IOUtils.copy(inputStream, outputStream);
+            WMIOUtils.copy(inputStream, outputStream);
         } catch (FileNotFoundException e) {
             throw new MojoExecutionException("File not found " + zipFile, e);
         } catch (IOException e) {
             throw new MojoExecutionException("Failed copy to zip file " + zipFile, e);
         } finally {
-            IOUtils.closeSilently(inputStream);
-            IOUtils.closeSilently(outputStream);
+            WMIOUtils.closeSilently(inputStream);
+            WMIOUtils.closeSilently(outputStream);
         }
     }
 
@@ -80,7 +80,7 @@ public class AppPackageMojo extends AbstractMojo {
         String zipFilePath = targetDir + "/" + projectName + ".zip";
         try {
             new File(targetDir).mkdirs();
-            return IOUtils.createFile(zipFilePath);
+            return WMIOUtils.createFile(zipFilePath);
         } catch (IOException e) {
             getLog().error(e);
             throw new MojoExecutionException("Failed to create zip file " + zipFilePath, e);

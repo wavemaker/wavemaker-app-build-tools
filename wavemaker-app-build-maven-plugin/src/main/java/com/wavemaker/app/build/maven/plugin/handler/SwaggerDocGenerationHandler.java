@@ -40,7 +40,7 @@ import com.wavemaker.app.build.swaggerdoc.SwaggerGenerator;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.File;
 import com.wavemaker.commons.io.Folder;
-import com.wavemaker.commons.util.IOUtils;
+import com.wavemaker.commons.util.WMIOUtils;
 import com.wavemaker.tools.apidocs.tools.core.model.Info;
 import com.wavemaker.tools.apidocs.tools.core.model.Swagger;
 
@@ -154,7 +154,7 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
         } catch (Exception e) {
             throw new WMRuntimeException("Failed to parse file ", e);
         } finally {
-            IOUtils.closeSilently(outputStream);
+            WMIOUtils.closeSilently(outputStream);
         }
     }
 
