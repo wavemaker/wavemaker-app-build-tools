@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.wavemaker.app.build</groupId>
         <artifactId>wavemaker-app-build-tools</artifactId>
-        <version>9.0</version>
+        <version>9.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
