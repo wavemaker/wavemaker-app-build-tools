@@ -16,7 +16,7 @@
 
     <properties>
         <jdk.version>1.8</jdk.version>
-        <wavemaker-api-tools.version>2.15</wavemaker-api-tools.version>
+        <wavemaker-api-tools.version>2.17</wavemaker-api-tools.version>
     </properties>
 
     <dependencyManagement>
