@@ -137,6 +137,7 @@ public class ServiceDefGenerator {
         List<Parameter> parameters = buildParameters(swagger, operation);
         Map<String, Set<Parameter>> definitions = buildDefinitions(swagger, operation);
         RuntimeProxySettings proxySettings = getProxySettings(swagger);
+        List<SecuritySchemeDefinition> securityDefinitions = getSecurityDefinitions(swagger, operation);
         return WMServiceOperationInfo.getNewInstance()
                 .addName(operation.getMethodName())
                 .addHttpMethod(httpMethod)
@@ -147,8 +148,22 @@ public class ServiceDefGenerator {
                 .addMethodType(httpMethod)
                 .addParameters(parameters)
                 .addDefinitions(definitions)
-                .addProxySettings(proxySettings);
+                .addProxySettings(proxySettings)
+                .addSecurityDefinition(securityDefinitions);
+    }
 
+    private List<SecuritySchemeDefinition> getSecurityDefinitions(Swagger swagger, Operation operation) {
+        List<Map<String, List<String>>> securityList = operation.getSecurity();
+        Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
+        if (securitySchemeDefinitionMap == null || securitySchemeDefinitionMap.isEmpty()) {
+            return null;
+        }
+        List<SecuritySchemeDefinition> securitySchemeDefinitions = new ArrayList<>();
+        for (Map<String, List<String>> security : securityList) {
+            String authenticationType = security.keySet().iterator().next();
+            securitySchemeDefinitions.add(securitySchemeDefinitionMap.get(authenticationType));
+        }
+        return securitySchemeDefinitions;
     }
 
     private Map<String, Set<Parameter>> buildDefinitions(final Swagger swagger, final Operation operation) {
