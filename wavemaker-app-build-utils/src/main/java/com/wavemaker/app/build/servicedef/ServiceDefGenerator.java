@@ -149,7 +149,7 @@ public class ServiceDefGenerator {
                 .addParameters(parameters)
                 .addDefinitions(definitions)
                 .addProxySettings(proxySettings)
-                .addSecurityDefinition(securityDefinitions);
+                .addSecurityDefinitions(securityDefinitions);
     }
 
     private List<SecuritySchemeDefinition> getSecurityDefinitions(Swagger swagger, Operation operation) {
