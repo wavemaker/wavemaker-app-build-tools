@@ -92,7 +92,7 @@ public class ProjectPackageHandler {
                 File ignoreFile = appPackageConfig.getBasedir().getFile(appPackageConfig.getIgnorePatternFile());
                 if (!ignoreFile.exists()) {
                     LOGGER.error("{} not found at location {}", appPackageConfig.getIgnorePatternFile(), appPackageConfig.getBasedir());
-                    throw new WMRuntimeException(appPackageConfig.getIgnorePatternFile() + " not found at location " + appPackageConfig.getBasedir());
+                    return ignorePatterns;
                 }
                 br = new BufferedReader(ignoreFile.getContent().asReader());
                 String pattern = null;
