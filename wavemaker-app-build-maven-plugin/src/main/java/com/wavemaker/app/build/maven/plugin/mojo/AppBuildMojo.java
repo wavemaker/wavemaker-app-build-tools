@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,12 @@ import org.apache.maven.shared.filtering.MavenResourcesExecution;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
 
-import com.wavemaker.app.build.maven.plugin.handler.*;
+import com.wavemaker.app.build.maven.plugin.handler.AppBuildHandler;
+import com.wavemaker.app.build.maven.plugin.handler.LocaleMessagesGenerationHandler;
+import com.wavemaker.app.build.maven.plugin.handler.PageMinFileGenerationHandler;
+import com.wavemaker.app.build.maven.plugin.handler.ProjectDbValidationsGenerationHandler;
+import com.wavemaker.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
+import com.wavemaker.app.build.maven.plugin.handler.VariableServiceDefGenerationHandler;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.local.LocalFolder;
@@ -128,6 +133,8 @@ public class AppBuildMojo extends AbstractMojo {
             Folder localeFolder = rootFolder.getFolder(localeDirectory);
             Folder localeOutputFolder = rootFolder.getFolder(localeOutputDirectory);
             appBuildHandlers.add(new LocaleMessagesGenerationHandler(localeFolder, localeOutputFolder));
+
+            appBuildHandlers.add(new ProjectDbValidationsGenerationHandler(rootFolder));
         }
     }
 
@@ -140,8 +147,8 @@ public class AppBuildMojo extends AbstractMojo {
             allClassPathElements.addAll(compileClasspathElements);
             allClassPathElements.addAll(runtimeClasspathElements);
             runtimeUrls = new URL[allClassPathElements.size()];
-            int index=0;
-            for (String s: allClassPathElements ) {
+            int index = 0;
+            for (String s : allClassPathElements) {
                 runtimeUrls[index++] = new File(s).toURI().toURL();
             }
         } catch (Exception exception) {

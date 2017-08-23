@@ -36,6 +36,7 @@ import org.xml.sax.SAXException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.wavemaker.app.build.BasePackage;
+import com.wavemaker.app.build.ProjectServicesHelper;
 import com.wavemaker.app.build.swaggerdoc.SwaggerGenerator;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.File;
@@ -114,8 +115,7 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
     }
 
     private String getBasePackageName(final Folder serviceFolder) {
-        final File serviceDefXML = serviceFolder.getFolder(DESIGN_TIME_FOLDER).getFile(SERVICE_DEF_XML);
-        String serviceType = findServiceType(serviceDefXML);
+        String serviceType = ProjectServicesHelper.findServiceType(serviceFolder);
         if (Objects.equals(serviceType, SECURITY_SERVICE_TYPE)) {
             return SECURITY_SERVICE_CONTROLLER_CLAZZ;
         } else if (Objects.equals(serviceType, FEED_SERVICE_TYPE)) {
@@ -125,25 +125,6 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
         return basePackage.getBasePackageName();
     }
 
-    private String findServiceType(final File serviceDefXML) {
-        String serviceType;
-        DocumentBuilderFactory dbFactory
-                = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = null;
-        InputStream is = null;
-        try {
-            dBuilder = dbFactory.newDocumentBuilder();
-            is = serviceDefXML.getContent().asInputStream();
-            Document doc = dBuilder.parse(is);
-            doc.getDocumentElement().normalize();
-            serviceType = doc.getDocumentElement().getAttribute("type");
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new WMRuntimeException("failed to find serviceType from servicedef xml file", e);
-        } finally {
-            org.apache.commons.io.IOUtils.closeQuietly(is);
-        }
-        return serviceType;
-    }
 
     protected void marshallAndWriteToFile(Swagger swagger, Folder designTimeFolder) {
         OutputStream outputStream = null;
