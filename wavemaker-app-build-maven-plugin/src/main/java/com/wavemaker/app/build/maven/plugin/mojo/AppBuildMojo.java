@@ -78,7 +78,7 @@ public class AppBuildMojo extends AbstractMojo {
     @Parameter(name = "outputDirectory", defaultValue = "target/classes")
     private String outputDirectory;
 
-    @Parameter(name = "localeOutputDirectory", defaultValue = "src/main/webapp/WEB-INF/i18n/")
+    @Parameter(name = "localeOutputDirectory", defaultValue = "src/main/webapp/resources/i18n/")
     private String localeOutputDirectory;
 
     @Parameter(defaultValue = "${session}")
