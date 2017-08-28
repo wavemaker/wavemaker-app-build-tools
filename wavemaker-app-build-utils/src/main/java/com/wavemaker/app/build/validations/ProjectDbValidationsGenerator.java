@@ -56,9 +56,6 @@ public class ProjectDbValidationsGenerator {
                 addSwaggerToListIfServiceTypeIsDbService(projectDbSwaggersList, serviceFolder);
             }
         }
-        if (projectDbSwaggersList.isEmpty()) {
-            return;
-        }
         logger.info("Generating dbValidationsJson file");
         File dbValidationsJsonFile = webInfFolder.getFile(DbValidationsConstants.DB_VALIDATIONS_JSON_FILE);
         if (!dbValidationsJsonFile.exists()) {
