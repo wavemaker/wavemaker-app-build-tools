@@ -75,11 +75,16 @@ public class ProjectDbValidationsGenerator {
         if (serviceFolder.exists()) {
             String serviceType = ProjectServicesHelper.findServiceType(serviceFolder);
             if (DATA_SERVICE.equals(serviceType)) {
-                File swaggerFile = serviceFolder.getFolder(DESIGN_TIME_FOLDER).getFile(serviceFolder.getName() + API_JSON);
-                try {
-                    swaggers.add(objectMapper.readValue(swaggerFile.getContent().asInputStream(), Swagger.class));
-                } catch (IOException e) {
-                    throw new WMRuntimeException(e);
+                Folder designTimeFolder = serviceFolder.getFolder(DESIGN_TIME_FOLDER);
+                if (designTimeFolder.exists()) {
+                    File swaggerFile = designTimeFolder.getFile(serviceFolder.getName() + API_JSON);
+                    if (swaggerFile.exists()) {
+                        try {
+                            swaggers.add(objectMapper.readValue(swaggerFile.getContent().asInputStream(), Swagger.class));
+                        } catch (IOException e) {
+                            throw new WMRuntimeException(e);
+                        }
+                    }
                 }
             }
         }
