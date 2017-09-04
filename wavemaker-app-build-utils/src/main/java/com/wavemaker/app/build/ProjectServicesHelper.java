@@ -24,6 +24,9 @@ public class ProjectServicesHelper {
 
     public static String findServiceType(Folder serviceFolder){
         final File serviceDefXML = serviceFolder.getFolder(DESIGN_TIME_FOLDER).getFile(SERVICE_DEF_XML);
+        if (!serviceDefXML.exists()) {
+            return null;
+        }
         String serviceType;
         DocumentBuilderFactory dbFactory
                 = DocumentBuilderFactory.newInstance();
