@@ -48,6 +48,7 @@ import com.wavemaker.app.build.maven.plugin.handler.VariableServiceDefGeneration
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.local.LocalFolder;
+import com.wavemaker.commons.util.WMIOUtils;
 
 /**
  * Created by saddhamp on 12/4/16.
@@ -91,7 +92,9 @@ public class AppBuildMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        initializeHandlers();
+        Folder rootFolder = new LocalFolder(baseDirectory);
+        
+        initializeHandlers(rootFolder);
 
         for (AppBuildHandler appBuildHandler : appBuildHandlers) {
             appBuildHandler.handle();
@@ -101,8 +104,9 @@ public class AppBuildMojo extends AbstractMojo {
         final List<String> nonFilteredFileExtensions = getNonFilteredFileExtensions(build.getPlugins());
 
 
+        Folder outputFolder = rootFolder.getFolder(outputDirectory); 
         MavenResourcesExecution mavenResourcesExecution =
-                new MavenResourcesExecution(build.getResources(), new File(outputDirectory), project,
+                new MavenResourcesExecution(build.getResources(), WMIOUtils.getJavaIOFile(outputFolder), project,
                         ENCODING, build.getFilters(), nonFilteredFileExtensions, session);
 
         try {
@@ -112,10 +116,9 @@ public class AppBuildMojo extends AbstractMojo {
         }
     }
 
-    private void initializeHandlers() throws MojoFailureException {
+    private void initializeHandlers(Folder rootFolder) throws MojoFailureException {
         if (appBuildHandlers == null) {
             appBuildHandlers = new ArrayList<>();
-            Folder rootFolder = new LocalFolder(baseDirectory);
 
             Folder pagesFolder = rootFolder.getFolder(pagesDirectory);
             if (pagesFolder.exists()) {
