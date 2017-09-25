@@ -3,6 +3,7 @@ package com.wavemaker.app.build.i18n;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -23,8 +24,9 @@ import com.wavemaker.commons.json.JSONUtils;
  */
 public final class SystemLocaleContext {
 
-    private static String DEFAULT_LOCALE = "en";
-    private static String SYSTEM_I18N_RESOURCES_DIR = "com/wavemaker/runtime/i18n";
+    private static final String DEFAULT_LOCALE = "en";
+    private static final String SYSTEM_I18N_RESOURCES_DIR = "com/wavemaker/runtime/i18n";
+    private static String[] DEFAULT_LANGUAGES_TO_ADD = new String[] {"en"};
 
     private static List<String> SYSTEM_SUPPORTED_LOCALES;
     private static Cache<String, Map<String, String>> systemMessagesCache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();
@@ -59,8 +61,13 @@ public final class SystemLocaleContext {
         return systemLocaleMessages;
     }
 
-    public static List<String> getAllSystemLocales() {
-        return SYSTEM_SUPPORTED_LOCALES;
+
+    public static String getDefaultSystemLocale() {
+        return DEFAULT_LOCALE;
+    }
+
+    public static String[] getDefaultLanguagesToAdd() {
+        return DEFAULT_LANGUAGES_TO_ADD;
     }
 
     private static Map<String, String> getSystemLocaleMessages(InputStream inputStream) {
@@ -80,8 +87,16 @@ public final class SystemLocaleContext {
                 String locale = FilenameUtils.removeExtension(resource.getFilename());
                 SYSTEM_SUPPORTED_LOCALES.add(locale);
             }
+
+            filterDefaultLanguages();
         } catch (IOException e) {
             throw new WMRuntimeException("Failed to load locales", e);
         }
+    }
+
+    private static void filterDefaultLanguages() {
+        DEFAULT_LANGUAGES_TO_ADD = Arrays.stream(DEFAULT_LANGUAGES_TO_ADD)
+                .filter(SYSTEM_SUPPORTED_LOCALES::contains)
+                .toArray(String[]::new);
     }
 }

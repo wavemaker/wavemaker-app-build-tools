@@ -69,7 +69,7 @@ public class LocaleMessagesGenerator {
     }
 
     private void addMissingSystemMessages(List<String> configuredLocales) {
-        List<String> locales = SystemLocaleContext.getAllSystemLocales();
+        String[] locales = SystemLocaleContext.getDefaultLanguagesToAdd();
         for (String locale : locales) {
             if (!configuredLocales.contains(locale)) {
                 File outputFile = outputFolder.getFile(locale + JSON_EXTENSION);
