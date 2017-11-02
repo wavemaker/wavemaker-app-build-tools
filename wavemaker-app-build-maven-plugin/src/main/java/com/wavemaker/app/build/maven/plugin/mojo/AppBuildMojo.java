@@ -45,6 +45,7 @@ import com.wavemaker.app.build.maven.plugin.handler.PageMinFileGenerationHandler
 import com.wavemaker.app.build.maven.plugin.handler.ProjectDbValidationsGenerationHandler;
 import com.wavemaker.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
 import com.wavemaker.app.build.maven.plugin.handler.VariableServiceDefGenerationHandler;
+import com.wavemaker.app.build.maven.plugin.handler.WMPropertiesFileGenerationHandler;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.local.LocalFolder;
@@ -81,6 +82,9 @@ public class AppBuildMojo extends AbstractMojo {
 
     @Parameter(name = "localeOutputDirectory", defaultValue = "src/main/webapp/resources/i18n/")
     private String localeOutputDirectory;
+
+    @Parameter(name = "webAppDirectory", defaultValue = "src/main/webapp/")
+    private String webAppDirectory;
 
     @Parameter(defaultValue = "${session}")
     private MavenSession session;
@@ -136,6 +140,7 @@ public class AppBuildMojo extends AbstractMojo {
             Folder localeFolder = rootFolder.getFolder(localeDirectory);
             Folder localeOutputFolder = rootFolder.getFolder(localeOutputDirectory);
             appBuildHandlers.add(new LocaleMessagesGenerationHandler(localeFolder, localeOutputFolder));
+            appBuildHandlers.add(new WMPropertiesFileGenerationHandler(rootFolder, rootFolder.getFolder(webAppDirectory), localeFolder));
 
             appBuildHandlers.add(new ProjectDbValidationsGenerationHandler(rootFolder));
         }
