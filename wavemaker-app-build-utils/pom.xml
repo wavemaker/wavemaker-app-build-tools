@@ -14,6 +14,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-filtering</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.wavemaker.commons</groupId>
             <artifactId>wavemaker-commons-util</artifactId>
             <version>${project.version}</version>

@@ -15,7 +15,6 @@
  */
 package com.wavemaker.app.build.maven.plugin.mojo;
 
-import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -43,10 +42,12 @@ import com.wavemaker.app.build.maven.plugin.handler.AppBuildHandler;
 import com.wavemaker.app.build.maven.plugin.handler.LocaleMessagesGenerationHandler;
 import com.wavemaker.app.build.maven.plugin.handler.PageMinFileGenerationHandler;
 import com.wavemaker.app.build.maven.plugin.handler.ProjectDbValidationsGenerationHandler;
+import com.wavemaker.app.build.maven.plugin.handler.ProjectPrefabBuildFolderGenerationHandler;
 import com.wavemaker.app.build.maven.plugin.handler.SwaggerDocGenerationHandler;
 import com.wavemaker.app.build.maven.plugin.handler.VariableServiceDefGenerationHandler;
 import com.wavemaker.app.build.maven.plugin.handler.WMPropertiesFileGenerationHandler;
 import com.wavemaker.commons.WMRuntimeException;
+import com.wavemaker.commons.io.File;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.local.LocalFolder;
 import com.wavemaker.commons.util.WMIOUtils;
@@ -60,6 +61,8 @@ public class AppBuildMojo extends AbstractMojo {
     public static final String ENCODING = "UTF-8";
     public static final String MAVEN_RESOURCES_PLUGIN = "maven-resources-plugin";
     private static final String NON_FILTERED_FILE_EXTENSIONS = "nonFilteredFileExtensions";
+    private static final String PROPERTIES = ".properties";
+    private static final String PROFILE_PROPERTY_FILE = "profile.props.file";
 
     @Parameter(property = "project", required = true, readonly = true)
     private MavenProject project;
@@ -89,6 +92,9 @@ public class AppBuildMojo extends AbstractMojo {
     @Parameter(defaultValue = "${session}")
     private MavenSession session;
 
+    @Parameter(name = "prefabs-directory", defaultValue = "src/main/webapp/WEB-INF/prefabs")
+    private String prefabsDirectory;
+
     @Component
     private MavenResourcesFiltering mavenResourcesFiltering;
 
@@ -97,8 +103,8 @@ public class AppBuildMojo extends AbstractMojo {
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         Folder rootFolder = new LocalFolder(baseDirectory);
-        
-        initializeHandlers(rootFolder);
+        String profilePropertyName = (String) project.getProperties().get(PROFILE_PROPERTY_FILE);
+        initializeHandlers(rootFolder, profilePropertyName);
 
         for (AppBuildHandler appBuildHandler : appBuildHandlers) {
             appBuildHandler.handle();
@@ -107,8 +113,7 @@ public class AppBuildMojo extends AbstractMojo {
         final Build build = project.getBuild();
         final List<String> nonFilteredFileExtensions = getNonFilteredFileExtensions(build.getPlugins());
 
-
-        Folder outputFolder = rootFolder.getFolder(outputDirectory); 
+        Folder outputFolder = rootFolder.getFolder(outputDirectory);
         MavenResourcesExecution mavenResourcesExecution =
                 new MavenResourcesExecution(build.getResources(), WMIOUtils.getJavaIOFile(outputFolder), project,
                         ENCODING, build.getFilters(), nonFilteredFileExtensions, session);
@@ -120,7 +125,7 @@ public class AppBuildMojo extends AbstractMojo {
         }
     }
 
-    private void initializeHandlers(Folder rootFolder) throws MojoFailureException {
+    private void initializeHandlers(Folder rootFolder, String profilePropertyName) throws MojoFailureException {
         if (appBuildHandlers == null) {
             appBuildHandlers = new ArrayList<>();
 
@@ -128,8 +133,6 @@ public class AppBuildMojo extends AbstractMojo {
             if (pagesFolder.exists()) {
                 appBuildHandlers.add(new PageMinFileGenerationHandler(pagesFolder));
             }
-
-
             Folder servicesFolder = rootFolder.getFolder(servicesDirectory);
             if (servicesFolder.exists()) {
                 URL[] runtimeClasspathElements = getRuntimeClasspathElements();
@@ -143,6 +146,9 @@ public class AppBuildMojo extends AbstractMojo {
             appBuildHandlers.add(new WMPropertiesFileGenerationHandler(rootFolder, rootFolder.getFolder(webAppDirectory), localeFolder));
 
             appBuildHandlers.add(new ProjectDbValidationsGenerationHandler(rootFolder));
+            Folder prefabsFolder = rootFolder.getFolder(prefabsDirectory);
+            File profilePropertyFile = rootFolder.getFolder("profiles").getFile(profilePropertyName + PROPERTIES);
+            appBuildHandlers.add(new ProjectPrefabBuildFolderGenerationHandler(project, prefabsFolder, profilePropertyFile, mavenResourcesFiltering, session));
         }
     }
 
@@ -157,7 +163,7 @@ public class AppBuildMojo extends AbstractMojo {
             runtimeUrls = new URL[allClassPathElements.size()];
             int index = 0;
             for (String s : allClassPathElements) {
-                runtimeUrls[index++] = new File(s).toURI().toURL();
+                runtimeUrls[index++] = new java.io.File(s).toURI().toURL();
             }
         } catch (Exception exception) {
             throw new MojoFailureException("Failed resolve project dependencies", exception);
