@@ -147,7 +147,7 @@ public class AppBuildMojo extends AbstractMojo {
 
             appBuildHandlers.add(new ProjectDbValidationsGenerationHandler(rootFolder));
             Folder prefabsFolder = rootFolder.getFolder(prefabsDirectory);
-            File profilePropertyFile = rootFolder.getFolder("profiles").getFile(profilePropertyName + PROPERTIES);
+            File profilePropertyFile = rootFolder.getFolder("profiles").getFile(profilePropertyName);
             appBuildHandlers.add(new ProjectPrefabBuildFolderGenerationHandler(project, prefabsFolder, profilePropertyFile, mavenResourcesFiltering, session));
         }
     }
