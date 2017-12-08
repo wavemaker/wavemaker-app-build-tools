@@ -9,18 +9,18 @@ import com.wavemaker.commons.io.Folder;
 public class LocaleMessagesGenerationHandler implements AppBuildHandler {
 
 
-    private Folder localeFolder;
+    private Folder rootFolder;
 
     private Folder outputFolder;
 
-    public LocaleMessagesGenerationHandler(Folder localeFolder, Folder localeOutputFolder) {
-        this.localeFolder = localeFolder;
+    public LocaleMessagesGenerationHandler(Folder rootFolder, Folder localeOutputFolder) {
+        this.rootFolder = rootFolder;
         this.outputFolder = localeOutputFolder;
     }
 
     @Override
     public void handle()  {
-        LocaleMessagesGenerator localeMessagesGenerator = new LocaleMessagesGenerator(localeFolder, outputFolder);
+        LocaleMessagesGenerator localeMessagesGenerator = new LocaleMessagesGenerator(rootFolder, outputFolder);
         localeMessagesGenerator.generate();
     }
 }
