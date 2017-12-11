@@ -142,7 +142,7 @@ public class AppBuildMojo extends AbstractMojo {
 
             Folder localeFolder = rootFolder.getFolder(localeDirectory);
             Folder localeOutputFolder = rootFolder.getFolder(localeOutputDirectory);
-            appBuildHandlers.add(new LocaleMessagesGenerationHandler(localeFolder, localeOutputFolder));
+            appBuildHandlers.add(new LocaleMessagesGenerationHandler(rootFolder, localeOutputFolder));
             appBuildHandlers.add(new WMPropertiesFileGenerationHandler(rootFolder, rootFolder.getFolder(webAppDirectory), localeFolder));
 
             appBuildHandlers.add(new ProjectDbValidationsGenerationHandler(rootFolder));
