@@ -66,8 +66,9 @@ public class LocaleMessagesGenerator {
         for (File file : localeFiles) {
             String language = FilenameUtils.removeExtension(file.getName());
             List<File> locales = configuredLocalesMap.get(language);
-            if (configuredLocalesMap.get(language) == null) {
-                configuredLocalesMap.put(language, new ArrayList<>());
+            if (locales == null) {
+                locales = new ArrayList<>();
+                configuredLocalesMap.put(language, locales);
             }
             locales.add(file);
         }
