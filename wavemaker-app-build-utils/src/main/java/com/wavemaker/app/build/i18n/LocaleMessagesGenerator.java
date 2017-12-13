@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -16,6 +17,7 @@ import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.LatestLastModified;
 import com.wavemaker.commons.io.Resources;
 import com.wavemaker.commons.json.JSONUtils;
+import com.wavemaker.commons.util.WMIOUtils;
 
 /**
  * @author Kishore Routhu on 4/7/17 6:56 PM.
@@ -52,6 +54,13 @@ public class LocaleMessagesGenerator {
             }
         }
         addMissingSystemMessages(configuredLocales);
+
+        List<File> localeFiles = outputFolder.list().files().fetchAll();
+        List<File> nonConfiguredLocales = localeFiles.stream().filter(file -> {
+            String locale = FilenameUtils.removeExtension(file.getName());
+            return !configuredLocales.contains(locale);
+        }).collect(Collectors.toList());
+        nonConfiguredLocales.forEach(WMIOUtils::deleteResourceSilently);
     }
 
 
@@ -136,6 +145,7 @@ public class LocaleMessagesGenerator {
         String[] locales = SystemLocaleContext.getDefaultLanguagesToAdd();
         for (String locale : locales) {
             if (!configuredLocales.contains(locale)) {
+                configuredLocales.add(locale);
                 File outputFile = outputFolder.getFile(locale + JSON_EXTENSION);
                 if (outputFile.exists() && SYSTEM_START_TIME <= outputFile.getLastModified()) {
                     continue;
