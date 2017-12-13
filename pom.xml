@@ -4,7 +4,7 @@
 
     <groupId>com.wavemaker.app.build</groupId>
     <artifactId>wavemaker-app-build-tools</artifactId>
-    <version>9.9.9</version>
+    <version>9.1.0</version>
     <packaging>pom</packaging>
     <name>wavemaker-app-build-tools</name>
 
