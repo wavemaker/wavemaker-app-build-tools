@@ -32,12 +32,6 @@
             <artifactId>wavemaker-app-runtime-core</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
