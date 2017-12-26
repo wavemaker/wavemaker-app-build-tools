@@ -58,6 +58,13 @@
                 <artifactId>spring-data-commons</artifactId>
                 <version>1.11.0.RELEASE</version>
             </dependency>
+            <!-- Adding this dependency to prevent stax-ex maven metadata download on each maven execution in the build and package plugins, It redownloads 
+            everytime because version is declared as RELEASE in the third party artifact streambuffer -->  
+            <dependency>
+                <groupId>org.jvnet.staxex</groupId>
+                <artifactId>stax-ex</artifactId>
+                <version>1.4</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
