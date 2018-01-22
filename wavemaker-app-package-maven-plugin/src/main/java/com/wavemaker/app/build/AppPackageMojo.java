@@ -15,9 +15,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.wavemaker.app.build.project.handler.ProjectPackageHandler;
 import com.wavemaker.app.build.project.model.AppPackageConfig;
+import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.Folder;
 import com.wavemaker.commons.io.local.LocalFolder;
 import com.wavemaker.commons.util.WMIOUtils;
@@ -44,9 +47,20 @@ public class AppPackageMojo extends AbstractMojo {
     @Parameter(name = "extraIgnorePatterns")
     private List<String> extraIgnorePatterns;
 
+    private static final Logger logger = LoggerFactory.getLogger(AppPackageMojo.class);
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        try {
+            doExecute();
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            e.printStackTrace();
+            throw new WMRuntimeException(e);
+        }
+    }
 
+    private void doExecute() throws MojoExecutionException {
         Folder baseFolder = new LocalFolder(basedir);
 
         AppPackageConfig appPackageConfig = new AppPackageConfig.Builder()

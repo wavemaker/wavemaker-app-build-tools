@@ -37,6 +37,8 @@ import org.apache.maven.shared.filtering.MavenFilteringException;
 import org.apache.maven.shared.filtering.MavenResourcesExecution;
 import org.apache.maven.shared.filtering.MavenResourcesFiltering;
 import org.codehaus.plexus.util.xml.Xpp3Dom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.wavemaker.app.build.maven.plugin.handler.AppBuildHandler;
 import com.wavemaker.app.build.maven.plugin.handler.LocaleMessagesGenerationHandler;
@@ -100,8 +102,20 @@ public class AppBuildMojo extends AbstractMojo {
 
     private List<AppBuildHandler> appBuildHandlers;
 
+    private static final Logger logger = LoggerFactory.getLogger(AppBuildMojo.class);
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
+        try {
+            doExecute();
+        } catch (Exception e) {
+            logger.warn(e.getMessage());
+            e.printStackTrace();
+            throw new WMRuntimeException(e);
+        }
+    }
+
+    private void doExecute() throws MojoFailureException {
         Folder rootFolder = new LocalFolder(baseDirectory);
         String profilePropertyName = (String) project.getProperties().get(PROFILE_PROPERTY_FILE);
         initializeHandlers(rootFolder, profilePropertyName);
