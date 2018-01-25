@@ -109,8 +109,7 @@ public class AppBuildMojo extends AbstractMojo {
         try {
             doExecute();
         } catch (Exception e) {
-            logger.warn(e.getMessage());
-            e.printStackTrace();
+            logger.warn(e.getMessage(), e);
             throw new WMRuntimeException(e);
         }
     }
