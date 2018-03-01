@@ -70,7 +70,7 @@ public class ServiceDefGenerator {
                     for (Operation operation : path.getOperations())
                         if (operation != null) {
 
-                            final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
+                            final String operationHttpType = new PathHandler(path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
                             final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
                             final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
@@ -107,7 +107,7 @@ public class ServiceDefGenerator {
                 for (Operation operation : path.getOperations())
                     if (operation != null) {
                         if (operation.getOperationId().equals(operationId)) {
-                            final String operationHttpType = new PathHandler(entry.getKey().toString(), path).getOperationType(operation.getOperationId());
+                            final String operationHttpType = new PathHandler(path).getOperationType(operation.getOperationId());
                             final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
                             final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
                             final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
@@ -252,17 +252,4 @@ public class ServiceDefGenerator {
         }
         return swaggerBasePath + pathBasePath + path.getRelativePath();
     }
-
-    public static void main(String[] args) throws OperationNotExistException, ServiceDefGenerationException {
-        File file = new File("/home/sunilp/Softwares/studio_setup/workspace/saas/users/j44nsmxt39/workspace/default/projects/T1/services/MyJavaService/designtime/MyJavaService_API.json");
-        try {
-            final Swagger swagger = JSONUtils.toObject(file, Swagger.class);
-            ServiceDefGenerator serviceDefGenerator = new ServiceDefGenerator(swagger);
-            final ServiceDefinition myJavaController_sampleJavaOperation = serviceDefGenerator.generate("MyJavaController_sampleJavaOperation");
-            System.out.println(myJavaController_sampleJavaOperation);
-        } catch (IOException e) {
-
-        }
-    }
-
 }
