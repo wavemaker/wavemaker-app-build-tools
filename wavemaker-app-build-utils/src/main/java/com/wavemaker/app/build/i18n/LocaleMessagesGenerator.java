@@ -31,7 +31,6 @@ public class LocaleMessagesGenerator {
 
     private static final String JSON_EXTENSION = ".json";
     private static final String EN = "en";
-    private static final String MISMATCH_LOCALE = "mismatchLocale";
     private static final String I18N = "i18n";
 
     private Folder rootFolder;

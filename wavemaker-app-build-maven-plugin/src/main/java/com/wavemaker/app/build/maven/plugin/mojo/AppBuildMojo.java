@@ -63,7 +63,6 @@ public class AppBuildMojo extends AbstractMojo {
     public static final String ENCODING = "UTF-8";
     public static final String MAVEN_RESOURCES_PLUGIN = "maven-resources-plugin";
     private static final String NON_FILTERED_FILE_EXTENSIONS = "nonFilteredFileExtensions";
-    private static final String PROPERTIES = ".properties";
     private static final String PROFILE_PROPERTY_FILE = "profile.props.file";
 
     @Parameter(property = "project", required = true, readonly = true)
@@ -161,7 +160,9 @@ public class AppBuildMojo extends AbstractMojo {
             appBuildHandlers.add(new ProjectDbValidationsGenerationHandler(rootFolder));
             Folder prefabsFolder = rootFolder.getFolder(prefabsDirectory);
             File profilePropertyFile = rootFolder.getFolder("profiles").getFile(profilePropertyName);
-            appBuildHandlers.add(new ProjectPrefabBuildFolderGenerationHandler(project, prefabsFolder, profilePropertyFile, mavenResourcesFiltering, session));
+            appBuildHandlers
+                    .add(new ProjectPrefabBuildFolderGenerationHandler(project, prefabsFolder, profilePropertyFile, mavenResourcesFiltering,
+                            session));
         }
     }
 
@@ -186,22 +187,21 @@ public class AppBuildMojo extends AbstractMojo {
     }
 
     private List<String> getNonFilteredFileExtensions(List<Plugin> plugins) {
+        List<String> nonFilteredFileExtensionsList = new ArrayList<>();
         for (Plugin plugin : plugins) {
             if (MAVEN_RESOURCES_PLUGIN.equals(plugin.getArtifactId())) {
                 final Object configuration = plugin.getConfiguration();
                 if (configuration != null) {
                     Xpp3Dom xpp3Dom = (Xpp3Dom) configuration;
                     final Xpp3Dom nonFilteredFileExtensions = xpp3Dom.getChild(NON_FILTERED_FILE_EXTENSIONS);
-                    List<String> nonFilteredFileExtensionsList = new ArrayList<>();
                     final Xpp3Dom[] children = nonFilteredFileExtensions.getChildren();
                     for (Xpp3Dom child : children) {
                         nonFilteredFileExtensionsList.add(child.getValue());
                     }
-                    return nonFilteredFileExtensionsList;
                 }
             }
         }
-        return null;
+        return nonFilteredFileExtensionsList;
     }
 }
 

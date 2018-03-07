@@ -14,6 +14,9 @@ import com.wavemaker.commons.util.PropertiesFileUtils;
  */
 public class PrefabsPropertiesExtractor {
 
+    private PrefabsPropertiesExtractor() {
+    }
+
     private static Pattern pattern = Pattern.compile("prefab.([^.]+).(.*)");
 
     //   Creates a map between prefabName and it's corresponding profile properties

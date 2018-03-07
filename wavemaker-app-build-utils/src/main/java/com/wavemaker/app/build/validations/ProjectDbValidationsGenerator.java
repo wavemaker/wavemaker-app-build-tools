@@ -51,7 +51,7 @@ public class ProjectDbValidationsGenerator {
     public void generate() {
         List<Swagger> projectDbSwaggersList = new ArrayList<>();
         List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
-        if (serviceFolders.size() > 0) {
+        if (!serviceFolders.isEmpty()) {
             for (Folder serviceFolder : serviceFolders) {
                 addSwaggerToListIfServiceTypeIsDbService(projectDbSwaggersList, serviceFolder);
             }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,9 +34,9 @@ public class PageMinFileUpdator {
     private Page page;
 
     public PageMinFileUpdator(Folder pageFolder, Page page) {
-        if(pageFolder == null)
+        if (pageFolder == null)
             throw new WMRuntimeException("Page folder is null");
-        if(page == null)
+        if (page == null)
             throw new WMRuntimeException("Page type is null");
         this.pageFolder = pageFolder;
         this.page = page;
@@ -58,10 +58,10 @@ public class PageMinFileUpdator {
     }
 
     private static String replacePageContent(String fileContent, String startElement, String endElement, String pageContent) {
-        String pageRegex = RegexConstants.MULTILINE_FLAG+ Pattern.quote(startElement)+RegexConstants.FIRST_OCCURENCE_OF_ANY_CHARSEQUENCE+Pattern.quote(endElement);
+        String pageRegex = RegexConstants.MULTILINE_FLAG + Pattern
+                .quote(startElement) + RegexConstants.FIRST_OCCURENCE_OF_ANY_CHARSEQUENCE + Pattern.quote(endElement);
         Pattern pageContentPattern = Pattern.compile(pageRegex);
-        String newPageMinFileContent = pageContentPattern.matcher(fileContent).replaceFirst(Matcher.quoteReplacement(pageContent));
-        return newPageMinFileContent;
+        return pageContentPattern.matcher(fileContent).replaceFirst(Matcher.quoteReplacement(pageContent));
     }
 
     private static void validatePageMinFile(String string, String subString) {

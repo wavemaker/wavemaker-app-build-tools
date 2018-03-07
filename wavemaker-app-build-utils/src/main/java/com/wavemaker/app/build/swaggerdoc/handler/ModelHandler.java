@@ -105,7 +105,8 @@ public class ModelHandler {
         }
     }
 
-    private void handleArrayProperty(final String propertyName, final ArrayProperty property, final Map<String, Property> propertiesMap, final int level) {
+    private void handleArrayProperty(
+            final String propertyName, final ArrayProperty property, final Map<String, Property> propertiesMap, final int level) {
         //this case occurs what property is List<int> || Set<Emp> || List<User> || Set<String> || ......
         ArrayProperty arrayProperty = property;
         boolean isList = arrayProperty.isList();
@@ -114,7 +115,6 @@ public class ModelHandler {
             if (argProperty instanceof RefProperty) {
                 // case : List<someObject> or Set<someObject>
                 RefProperty refProperty = (RefProperty) argProperty;
-                PropertyHandler refPropertyHandler = new PropertyHandler(refProperty, definitions);
                 final Model refModel = definitions.get(refProperty.getSimpleRef());
                 propertiesMap.put(propertyName, refProperty);
                 listProperties(refModel, level - 1, propertiesMap);
@@ -125,11 +125,12 @@ public class ModelHandler {
         }
     }
 
-    private void handleRefProperty(final String propertyName, final RefProperty property, final Map<String, Property> propertiesMap, final int level) {
+    private void handleRefProperty(
+            final String propertyName, final RefProperty property, final Map<String, Property> propertiesMap, final int level) {
         //this case occurs when property is Object<Object,Object....> eq : Page<Employee>
         RefProperty refProperty = property;
         List<Property> argProperties = refProperty.getTypeArguments();
-        if (argProperties.size() > 0) {
+        if (!argProperties.isEmpty()) {
             for (Property argProperty : argProperties) {
                 handleProperty(propertyName, propertiesMap, level, argProperty);
             }
@@ -138,7 +139,8 @@ public class ModelHandler {
         }
     }
 
-    private void handleProperty(final String propertyName, final Map<String, Property> propertiesMap, final int level, final Property property) {
+    private void handleProperty(
+            final String propertyName, final Map<String, Property> propertiesMap, final int level, final Property property) {
         PropertyHandler propertyHandler = new PropertyHandler(property, definitions);
         if (propertyHandler.isPrimitive()) {
             propertiesMap.put(propertyName, property);

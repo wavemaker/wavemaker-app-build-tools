@@ -2,6 +2,7 @@ package com.wavemaker.app.build.swaggerdoc.handler;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,21 +35,15 @@ public class PropertyHandler {
     }
 
     public boolean isArray() {
-        if (property instanceof ArrayProperty && !((ArrayProperty) property).isList()) {
-            return true;
-        }
-        return false;
+        return property instanceof ArrayProperty && !((ArrayProperty) property).isList();
     }
 
     public boolean isPrimitive() {
-        if (property instanceof BooleanProperty || property instanceof DateProperty ||
+        return property instanceof BooleanProperty || property instanceof DateProperty ||
                 property instanceof DateTimeProperty || property instanceof DoubleProperty ||
                 property instanceof FloatProperty || property instanceof DecimalProperty ||
                 property instanceof IntegerProperty || property instanceof LongProperty ||
-                property instanceof StringProperty) {
-            return true;
-        }
-        return false;
+                property instanceof StringProperty;
     }
 
     public String getFullyQualifiedType() {
@@ -119,7 +114,7 @@ public class PropertyHandler {
         }
 
         // when property is primitive type
-        return null;
+        return Collections.emptyList();
     }
 
     private String getModelFullyQualifiedName(String refName) {

@@ -40,7 +40,7 @@ public class ParameterHandler {
                 Model actualModel = models.get(refModel.getSimpleRef());
                 if (actualModel != null) {
                     List<Model> argumentModel = refModel.getTypeArguments();
-                    if (argumentModel.size() > 0) {
+                    if (!argumentModel.isEmpty()) {
                         Model argModel = argumentModel.get(0);
                         if (argModel instanceof RefModel) {
                             RefModel refArgModel = (RefModel) argModel;
@@ -82,7 +82,6 @@ public class ParameterHandler {
                 if (arrayModel.isList()) {
                     return true;
                 }
-                return false;
             }
         }
         return false;

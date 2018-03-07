@@ -11,6 +11,9 @@ import com.wavemaker.commons.util.XMLUtils;
  */
 public class ProjectServicesHelper {
 
+    private ProjectServicesHelper() {
+    }
+
     private static final String DESIGN_TIME_FOLDER = "designtime";
     private static final String SERVICE_DEF_XML = "servicedef.xml";
 

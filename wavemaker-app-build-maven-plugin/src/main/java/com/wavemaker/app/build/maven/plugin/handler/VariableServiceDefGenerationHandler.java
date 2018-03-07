@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,7 +57,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
     private static final String WEBSOCKET_SERVICE_API_EXTENSION = "_API_WEBSOCKET_SERVICE.json";
     public static final String SERVICE_SRC_DIR = "src";
     private static String SERVICE_DEF_RESOURCE_NAME = "{}-service-definitions.json";
-    private static final String[] SWAGGER_EXTENSIONS = new String[] {WEBSOCKET_SERVICE_API_EXTENSION, REST_SERVICE_API_EXTENSION, API_EXTENSION};
+    private static final String[] SWAGGER_EXTENSIONS = new String[]{WEBSOCKET_SERVICE_API_EXTENSION, REST_SERVICE_API_EXTENSION, API_EXTENSION};
 
 
     private final String servicesDirectory = "services";
@@ -87,7 +87,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
     private void buildServiceDefsForAllServices(final Folder servicesFolder) {
         if (servicesFolder.exists()) {
             List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
-            if (serviceFolders.size() > 0) {
+            if (!serviceFolders.isEmpty()) {
                 for (final Folder serviceFolder : serviceFolders) {
                     serviceVsServiceDefs.put(serviceFolder.getName(), buildServiceDefs(serviceFolder));
                 }
@@ -111,7 +111,7 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
             logger.error("Swagger File does not exist for service {}", serviceFolder.getName());
         }
         try {
-            return swagger != null ? new ServiceDefGenerator(swagger).generate() : new HashMap<>();
+            return (swagger != null) ? new ServiceDefGenerator(swagger).generate() : new HashMap<>();
         } catch (ServiceDefGenerationException e) {
             throw new WMRuntimeException("Failed to build service def for service " + swagger.getInfo().getServiceId(), e);
         }
@@ -119,7 +119,8 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
 
 
     private void generateServiceDefs() {
-        Resources<File> files = rootFolder.find().files().exclude(FilterOn.antPattern("/app/prefabs/**")).include(FilterOn.names().ending(".variables.json"));
+        Resources<File> files = rootFolder.find().files().exclude(FilterOn.antPattern("/app/prefabs/**"))
+                .include(FilterOn.names().ending(".variables.json"));
         for (final File file : files) {
             try {
                 generateServiceDefs(file);
@@ -155,9 +156,10 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
                     continue;
                 }
                 Map<String, ServiceDefinition> serviceDefinitions = serviceVsServiceDefs.get(serviceId);
-                ServiceDefinition serviceDefinition = (serviceDefinitions == null) ? null: serviceDefinitions.get(operationId);
+                ServiceDefinition serviceDefinition = (serviceDefinitions == null) ? null : serviceDefinitions.get(operationId);
                 if (serviceDefinition == null) {
-                    logger.warn("service {} doesn't exist with for the service variable with name {} and operationId {}",serviceId,variableName,operationId);
+                    logger.warn("service {} doesn't exist with for the service variable with name {} and operationId {}", serviceId,
+                            variableName, operationId);
                     continue;
                 }
                 Map<String, ServiceDefinition> filteredServiceDefinitions = filteredServiceVsServiceDefinitions.get(serviceId);
@@ -172,8 +174,8 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
 
 
     protected void persistServiceDefs() {
-        for (final String service : filteredServiceVsServiceDefinitions.keySet()) {
-            persistServiceDefs(service, filteredServiceVsServiceDefinitions.get(service));
+        for (Map.Entry<String, Map<String, ServiceDefinition>> entry : filteredServiceVsServiceDefinitions.entrySet()) {
+            persistServiceDefs(entry.getKey(), entry.getValue());
         }
     }
 

@@ -60,7 +60,7 @@ public class ProjectPackageHandler {
         List<String> ignorePatterns = readIgnorePatterns();
         addExtraIgnorePatterns(ignorePatterns);
 
-        String antPatterns[] = new String[ignorePatterns.size()];
+        String[] antPatterns = new String[ignorePatterns.size()];
         ignorePatterns.toArray(antPatterns);
         try {
             if (packageFolder.exists()) {

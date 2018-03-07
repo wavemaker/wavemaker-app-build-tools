@@ -76,7 +76,7 @@ public class SwaggerDocGenerationHandler implements AppBuildHandler {
             urlClassLoader = new URLClassLoader(classPathURLs, Thread.currentThread().getContextClassLoader());
 
             List<Folder> serviceFolders = servicesFolder.list().folders().fetchAll();
-            if (serviceFolders.size() > 0) {
+            if (!serviceFolders.isEmpty()) {
                 for (Folder serviceFolder : serviceFolders) {
                     generateSwaggerDoc(serviceFolder);
                 }

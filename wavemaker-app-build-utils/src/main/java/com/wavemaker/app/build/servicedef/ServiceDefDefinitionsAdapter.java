@@ -52,9 +52,6 @@ public class ServiceDefDefinitionsAdapter {
             if (model instanceof ArrayModel) {
                 //When Body is List<String>,Set<Object>...
                 ArrayModel arrayModel = (ArrayModel) model;
-                if (!arrayModel.isList()) {
-
-                }
                 Property property = arrayModel.getItems();
                 PropertyHandler propertyHandler = new PropertyHandler(property, swagger.getDefinitions());
                 if (propertyHandler.isPrimitive()) {
@@ -78,7 +75,7 @@ public class ServiceDefDefinitionsAdapter {
     private void generateFieldsFromRefModels(final RefModel refModel, final int depth) {
         final Map<String, Model> definitions = swagger.getDefinitions();
         List<Model> argumentModel = refModel.getTypeArguments();
-        if (argumentModel.size() > 0) {
+        if (!argumentModel.isEmpty()) {
             //considering first argument if model have multiple types like Employee<OldEmployee,NewEmployee,.....>
             Model argModel = argumentModel.get(0);
             if (argModel instanceof RefModel) {

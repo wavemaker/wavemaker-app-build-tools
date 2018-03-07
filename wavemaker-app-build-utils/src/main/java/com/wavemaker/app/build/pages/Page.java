@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,36 +75,34 @@ public enum Page {
     }
 
     public String getStartElement(String pageName) {
-        String manipulateStartElement = PAGE_NAME_PATTERN.matcher(startElement).replaceAll(pageName);
-        return manipulateStartElement;
+        return PAGE_NAME_PATTERN.matcher(startElement).replaceAll(pageName);
     }
 
     public String getEndElement() {
         return endElement;
     }
 
-    private String getPageFileName(String pageName){
+    private String getPageFileName(String pageName) {
         return pageName + "." + fileSuffix;
     }
 
-    private String getTemplateContent(String pageName, String originalContent){
+    private String getTemplateContent(String pageName, String originalContent) {
         String lineBreak = SystemUtils.getLineBreak();
 
         String startElement = this.getStartElement(pageName);
-        startElement = startElement+lineBreak;
+        startElement = startElement + lineBreak;
 
         String manipulatedContent = PAGE_NAME_PATTERN.matcher(contentTemplate).replaceAll(pageName);
         manipulatedContent = CONTENT_PATTERN.matcher(manipulatedContent).replaceFirst(Matcher.quoteReplacement(originalContent));
-        manipulatedContent = StringUtils.isNotBlank(manipulatedContent)?manipulatedContent+lineBreak:manipulatedContent;
+        manipulatedContent = StringUtils.isNotBlank(manipulatedContent) ? manipulatedContent + lineBreak : manipulatedContent;
 
         String endElement = this.getEndElement();
-        endElement = endElement+lineBreak;
+        endElement = endElement + lineBreak;
 
-        String templateContent = startElement+manipulatedContent+endElement;
-        return templateContent;
+        return startElement + manipulatedContent + endElement;
     }
 
-    public String constructTemplate(Folder pageFolder){
+    public String constructTemplate(Folder pageFolder) {
         String templateContent = null;
 
         try {
@@ -115,14 +113,14 @@ public enum Page {
             templateContent = StringUtils.isBlank(templateContent) ? defaultContent : templateContent.trim();
             templateContent = getTemplateContent(pageName, templateContent);
 
-        } catch (IOException ioException){
+        } catch (IOException ioException) {
             throw new WMRuntimeException("Failed to construct template for project page", ioException);
         }
 
         return templateContent;
     }
 
-    public static Page getPage(String pageName){
+    public static Page getPage(String pageName) {
         return (StringUtils.isNotBlank(pageName) ? Page.valueOf(pageName.toUpperCase()) : null);
     }
 }

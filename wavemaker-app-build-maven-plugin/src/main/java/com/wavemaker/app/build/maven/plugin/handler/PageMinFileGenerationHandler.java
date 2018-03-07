@@ -36,7 +36,7 @@ public class PageMinFileGenerationHandler implements AppBuildHandler {
     @Override
     public void handle() {
         List<Folder> pageFolders = pagesFolder.list().folders().fetchAll();
-        if (pageFolders.size() > 0){
+        if (!pageFolders.isEmpty()){
             PageMinFileGenerator pageMinFileGenerator = new PageMinFileGenerator(pageFolders);
             pageMinFileGenerator.setForceOverwrite(true).generate();
         }

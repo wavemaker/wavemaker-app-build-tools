@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -33,7 +33,7 @@ public class BasePackage {
     private String basePackageName;
 
     public BasePackage(Folder sourceFolder) {
-        if(sourceFolder == null || !sourceFolder.exists())
+        if (sourceFolder == null || !sourceFolder.exists())
             throw new WMRuntimeException("Source folder is null or does not exist");
 
         this.sourceFolder = sourceFolder;
@@ -71,10 +71,10 @@ public class BasePackage {
      */
     private void computeBasePackage() {
         List<File> javaFiles = sourceFolder.find().files().include(FilterOn.names().ending(".java")).fetchAll();
-        if (javaFiles.size() > 0){
+        if (!javaFiles.isEmpty()) {
             boolean emptyPathExists = checkIfEmptyPathExists(javaFiles);
 
-            if(!emptyPathExists) {
+            if (!emptyPathExists) {
                 String longestCommonPath = javaFiles.get(0).getParent().toStringRelativeTo(sourceFolder);
                 int longestCommonPathLength = longestCommonPath.length();
 
@@ -84,7 +84,7 @@ public class BasePackage {
                     longestCommonPathLength = getNewCommonPathLength(longestCommonPath, longestCommonPathLength, currentPath);
                 }
 
-                if(longestCommonPathLength>0){
+                if (longestCommonPathLength > 0) {
                     //Extracting the longest common package
                     longestCommonPath = longestCommonPath.substring(0, longestCommonPathLength);
                     //Convert to package notation
@@ -94,10 +94,10 @@ public class BasePackage {
         }
     }
 
-    private boolean checkIfEmptyPathExists(List<File> files){
+    private boolean checkIfEmptyPathExists(List<File> files) {
         boolean emptyPathExists = false;
 
-        if (files.size() > 0){
+        if (!files.isEmpty()) {
             for (File file : files) {
                 //Check if current folder of file is same as source folder
                 if (StringUtils.isBlank(file.getParent().toStringRelativeTo(sourceFolder))) {
@@ -116,23 +116,23 @@ public class BasePackage {
         int newLongstComnPathLen = 0;
         int potentialLongstComnPathLen = 0;
 
-        for(int i=0; i<minLength; i++){
+        for (int i = 0; i < minLength; i++) {
             //Break if current character doesn't
-            if(longestCommonPath.charAt(i)!=nextPath.charAt(i))
+            if (longestCommonPath.charAt(i) != nextPath.charAt(i))
                 break;
 
             //Potential longest common path length, used when whole folder name or path name matches
             potentialLongstComnPathLen++;
 
             //Update only when whole folder name or path name matches
-            if(longestCommonPath.charAt(i)=='/' || i==(minLength-1)) {
+            if (longestCommonPath.charAt(i) == '/' || i == (minLength - 1)) {
                 newLongstComnPathLen = potentialLongstComnPathLen;
             }
         }
 
         //Ignore last delimiter after folder name
-        if(longestCommonPath.charAt(newLongstComnPathLen-1)=='/'){
-            newLongstComnPathLen = newLongstComnPathLen-1;
+        if (longestCommonPath.charAt(newLongstComnPathLen - 1) == '/') {
+            newLongstComnPathLen = newLongstComnPathLen - 1;
         }
 
         return newLongstComnPathLen;

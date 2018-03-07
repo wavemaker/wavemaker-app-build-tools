@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,8 +29,8 @@ public class PageMinFileGenerator {
     private List<Folder> pageFolders;
     private boolean forceOverwrite;
 
-    public PageMinFileGenerator(List<Folder> pageFolders){
-        if(pageFolders == null || pageFolders.size() < 1)
+    public PageMinFileGenerator(List<Folder> pageFolders) {
+        if (pageFolders == null || pageFolders.isEmpty())
             throw new WMRuntimeException("List of page folders is either null or empty");
         this.pageFolders = pageFolders;
     }
@@ -50,15 +50,15 @@ public class PageMinFileGenerator {
     }
 
     private static void generate(Folder pageFolder) {
-            StringBuilder pageMinFileContent = new StringBuilder();
-            pageMinFileContent.append(Page.CSS.constructTemplate(pageFolder));
-            pageMinFileContent.append(Page.JS.constructTemplate(pageFolder));
-            pageMinFileContent.append(Page.JSON.constructTemplate(pageFolder));
-            pageMinFileContent.append(Page.HTML.constructTemplate(pageFolder));
+        StringBuilder pageMinFileContent = new StringBuilder();
+        pageMinFileContent.append(Page.CSS.constructTemplate(pageFolder));
+        pageMinFileContent.append(Page.JS.constructTemplate(pageFolder));
+        pageMinFileContent.append(Page.JSON.constructTemplate(pageFolder));
+        pageMinFileContent.append(Page.HTML.constructTemplate(pageFolder));
 
-            File pageMinFile = pageFolder.getFile(AppBuildConstants.PAGE_MIN_FILE);
-            pageMinFile.createIfMissing();
+        File pageMinFile = pageFolder.getFile(AppBuildConstants.PAGE_MIN_FILE);
+        pageMinFile.createIfMissing();
 
-            pageMinFile.getContent().write(pageMinFileContent.toString().trim());
+        pageMinFile.getContent().write(pageMinFileContent.toString().trim());
     }
 }

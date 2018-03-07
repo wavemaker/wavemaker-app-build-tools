@@ -1,6 +1,7 @@
 package com.wavemaker.app.build.adapter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -40,12 +41,12 @@ public class ServiceDefPropertiesAdapter {
                 //When Body is List<String>,Set<Object>...
                 ArrayModel arrayModel = (ArrayModel) model;
                 if (!arrayModel.isList()) {
-                    return null;
+                    return Collections.emptyList();
                 }
                 Property property = arrayModel.getItems();
                 PropertyHandler propertyHandler = new PropertyHandler(property, swagger.getDefinitions());
                 if (propertyHandler.isPrimitive()) {
-                    return null;
+                    return Collections.emptyList();
                 } else {
                     if (property instanceof RefProperty) {
                         String refName = ((RefProperty) property).getSimpleRef();
@@ -54,19 +55,19 @@ public class ServiceDefPropertiesAdapter {
                     }
                     if (property instanceof ArrayProperty) {
                         //FIXME check if this case exist i,e List<List<Integer>> or Array[List<Object>]..
-                        return null;
+                        return Collections.emptyList();
                     }
                 }
             }
         }
         //when body is primitive like string
-        return null;
+        return Collections.emptyList();
 
     }
 
     private List<String> generateFieldsFromRefModels(final RefModel refModel, final Map<String, Model> definitions) {
         List<Model> argumentModel = refModel.getTypeArguments();
-        if (argumentModel.size() > 0) {
+        if (!argumentModel.isEmpty()) {
             //considering first argument if model have multiple types like Employee<OldEmployee,NewEmployee,.....>
             Model argModel = argumentModel.get(0);
             if (argModel instanceof RefModel) {
@@ -80,7 +81,7 @@ public class ServiceDefPropertiesAdapter {
             final Model model = definitions.get(refModel.getSimpleRef());
             return generateFields(model, definitions);
         }
-        return null;
+        return Collections.emptyList();
     }
 
 
@@ -89,8 +90,7 @@ public class ServiceDefPropertiesAdapter {
         ModelHandler modelHandler = new ModelHandler(model, definitions);
         final Map<String, Property> propertiesMap = modelHandler.listProperties(model, MODEL_PROPERTIES_LEVEL);
         List<String> fields = new ArrayList<>();
-        for (Map.Entry<String, Property> entry : propertiesMap.entrySet())
-        {
+        for (Map.Entry<String, Property> entry : propertiesMap.entrySet()) {
             if (entry.getValue().getRequired()) {
                 fields.add(entry.getKey());
             }
