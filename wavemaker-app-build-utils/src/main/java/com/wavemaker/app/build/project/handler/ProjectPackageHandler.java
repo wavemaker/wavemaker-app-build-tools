@@ -117,18 +117,17 @@ public class ProjectPackageHandler {
 
     private void compressToZip(Folder sourceFolder, java.io.File zipFile) {
         InputStream zipInputStream = null;
-        OutputStream zipOutputStream = null;
         try {
             zipInputStream = ZipArchive.compress(sourceFolder.find().files());
-            zipOutputStream = new FileOutputStream(zipFile);
-            WMIOUtils.copy(zipInputStream, zipOutputStream);
+            try (OutputStream zipOutputStream = new FileOutputStream(zipFile)){
+                WMIOUtils.copy(zipInputStream, zipOutputStream);
+            }
         } catch (FileNotFoundException e) {
             throw new WMRuntimeException("FileNotFound " + zipFile.getAbsolutePath(), e);
         } catch (IOException e) {
             throw new WMRuntimeException(e);
         } finally {
             WMIOUtils.closeSilently(zipInputStream);
-            WMIOUtils.closeSilently(zipOutputStream);
         }
     }
 

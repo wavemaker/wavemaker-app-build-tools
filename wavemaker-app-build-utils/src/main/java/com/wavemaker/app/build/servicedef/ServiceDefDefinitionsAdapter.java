@@ -107,9 +107,9 @@ public class ServiceDefDefinitionsAdapter {
                                 final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyEntry.getKey(), propertyEntry.getValue());
                                 addParameter(composedModel.getFullyQualifiedName(), parameter);
                                 if (propertyEntry.getValue() instanceof RefProperty) {
-                                    handleRefProperty(propertyEntry.getKey(), (RefProperty) propertyEntry.getValue(), depth - 1);
+                                    handleRefProperty((RefProperty) propertyEntry.getValue(), depth - 1);
                                 } else if (propertyEntry.getValue() instanceof ArrayProperty) {
-                                    handleArrayProperty(propertyEntry.getKey(), (ArrayProperty) propertyEntry.getValue(), depth - 1);
+                                    handleArrayProperty((ArrayProperty) propertyEntry.getValue(), depth - 1);
                                 }
                             }
                         }
@@ -126,22 +126,21 @@ public class ServiceDefDefinitionsAdapter {
         ModelImpl actualModel = (ModelImpl) model;
         final Map<String, Property> properties = actualModel.getProperties();
         if (properties != null) {
-            for (String propertyName : properties.keySet()) {
-                final Property property = properties.get(propertyName);
-                final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyName, property);
+            for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                final Property property = propertyEntry.getValue();
+                final com.wavemaker.commons.servicedef.model.Parameter parameter = buildParameter(propertyEntry.getKey(), property);
                 addParameter(actualModel.getFullyQualifiedName(), parameter);
                 if (property instanceof ArrayProperty) {
-                    handleArrayProperty(propertyName, (ArrayProperty) property, depth - 1);
+                    handleArrayProperty((ArrayProperty) property, depth - 1);
                 } else if (property instanceof RefProperty) {
-                    handleRefProperty(propertyName, (RefProperty) property, depth - 1);
+                    handleRefProperty((RefProperty) property, depth - 1);
                 }
             }
         }
     }
 
 
-    private void handleRefProperty(final String propertyName, final RefProperty property, final int depth) {
-        RefProperty refProperty = property;
+    private void handleRefProperty( final RefProperty property, final int depth) {
         // TODO this case needs to be handle
         //this case occurs when property is Object<Object,Object....> eq : Page<Employee>
         /*List<Property> argProperties = refProperty.getTypeArguments();
@@ -150,12 +149,12 @@ public class ServiceDefDefinitionsAdapter {
                 handleProperty(propertyName, argProperty);
             }
         }*/
-        final Model model = swagger.getDefinitions().get(((RefProperty) property).getSimpleRef());
+        final Model model = swagger.getDefinitions().get((property).getSimpleRef());
         generateFields(model, depth);
 
     }
 
-    private void handleArrayProperty(final String propertyName, final ArrayProperty property, final int depth) {
+    private void handleArrayProperty(final ArrayProperty property, final int depth) {
         //this case occurs what property is List<int> || Set<Emp> || List<User> || Set<String> || ......
         ArrayProperty arrayProperty = property;
         boolean isList = arrayProperty.isList();

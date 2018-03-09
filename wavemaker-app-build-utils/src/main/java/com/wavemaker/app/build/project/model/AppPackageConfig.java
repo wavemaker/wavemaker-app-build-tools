@@ -38,8 +38,6 @@ public class AppPackageConfig {
         private String ignorePatternFile;
         private List<String> extraIgnorePatterns;
 
-        public Builder() {
-        }
 
         public Builder basedir(Folder basedir) {
             this.basedir = basedir;

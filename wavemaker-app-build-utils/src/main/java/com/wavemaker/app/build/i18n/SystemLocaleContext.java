@@ -24,9 +24,12 @@ import com.wavemaker.commons.json.JSONUtils;
  */
 public final class SystemLocaleContext {
 
+    private SystemLocaleContext() {
+    }
+
     private static final String DEFAULT_LOCALE = "en";
     private static final String SYSTEM_I18N_RESOURCES_DIR = "com/wavemaker/runtime/i18n";
-    private static String[] DEFAULT_LANGUAGES_TO_ADD = new String[] {"en"};
+    private static String[] DEFAULT_LANGUAGES_TO_ADD = {"en"};
 
     private static List<String> SYSTEM_SUPPORTED_LOCALES;
     private static Cache<String, Map<String, String>> systemMessagesCache = CacheBuilder.newBuilder().expireAfterAccess(5, TimeUnit.MINUTES).build();

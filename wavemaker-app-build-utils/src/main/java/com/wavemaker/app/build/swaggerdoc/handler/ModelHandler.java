@@ -86,8 +86,9 @@ public class ModelHandler {
             final Map<String, Property> properties = actualModel.getProperties();
             if (properties != null) {
                 final List<String> required = actualModel.getRequired();
-                for (String propertyName : properties.keySet()) {
-                    final Property property = properties.get(propertyName);
+                for (Map.Entry<String, Property> propertyEntry : properties.entrySet()) {
+                    String propertyName = propertyEntry.getKey();
+                    final Property property = propertyEntry.getValue();
                     if (required != null && required.contains(propertyName)) {
                         final PropertyHandler propertyHandler = new PropertyHandler(property, definitions);
                         if (propertyHandler.isPrimitive()) {

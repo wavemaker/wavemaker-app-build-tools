@@ -15,18 +15,15 @@
  */
 package com.wavemaker.app.build.servicedef;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.wavemaker.app.build.adapter.ServiceDefPropertiesAdapter;
 import com.wavemaker.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.commons.OperationNotExistException;
-import com.wavemaker.commons.json.JSONUtils;
 import com.wavemaker.commons.servicedef.model.Parameter;
 import com.wavemaker.commons.servicedef.model.RuntimeProxySettings;
 import com.wavemaker.commons.servicedef.model.ServiceDefinition;
@@ -50,7 +47,6 @@ import com.wavemaker.tools.apidocs.tools.core.model.parameters.AbstractParameter
 public class ServiceDefGenerator {
 
     public static final int PARAMETERS_DEPTH = 1;
-    private final ServiceDefPropertiesAdapter serviceDefPropertiesAdapter = new ServiceDefPropertiesAdapter();
 
     private final Swagger swagger;
 
@@ -77,7 +73,7 @@ public class ServiceDefGenerator {
                                     operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
 
 
-                            serviceDefs.put(operation.getOperationId(), new ServiceDefinition().getNewInstance()
+                            serviceDefs.put(operation.getOperationId(), ServiceDefinition.getNewInstance()
                                     .addId(operation.getOperationId())
                                     .addController(operation.getTags().get(0))
                                     .addType(operationType)
@@ -105,23 +101,21 @@ public class ServiceDefGenerator {
             for (Map.Entry entry : swagger.getPaths().entrySet()) {
                 Path path = (Path) entry.getValue();
                 for (Operation operation : path.getOperations())
-                    if (operation != null) {
-                        if (operation.getOperationId().equals(operationId)) {
-                            final String operationHttpType = new PathHandler(path).getOperationType(operation.getOperationId());
-                            final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
-                            final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
-                            final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
-                                    operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
+                    if (operation != null && (operation.getOperationId().equals(operationId))) {
+                        final String operationHttpType = new PathHandler(path).getOperationType(operation.getOperationId());
+                        final String operationType = new OperationHandler(operation, swagger.getDefinitions()).getFullyQualifiedReturnType();
+                        final String serviceOperationRelativePath = getServiceOperationRelativePath(swagger, path);
+                        final WMServiceOperationInfo operationInfo = buildWMServiceOperationInfo(swagger,
+                                operation, operationHttpType, serviceOperationRelativePath, path.getCompletePath());
 
 
-                            return new ServiceDefinition().getNewInstance()
-                                    .addId(operation.getOperationId())
-                                    .addController(operation.getTags().get(0))
-                                    .addType(operationType)
-                                    .addOperationType(operationType)
-                                    .addService(swagger.getInfo().getServiceId())
-                                    .addWmServiceOperationInfo(operationInfo);
-                        }
+                        return ServiceDefinition.getNewInstance()
+                                .addId(operation.getOperationId())
+                                .addController(operation.getTags().get(0))
+                                .addType(operationType)
+                                .addOperationType(operationType)
+                                .addService(swagger.getInfo().getServiceId())
+                                .addWmServiceOperationInfo(operationInfo);
                     }
             }
         } catch (Exception e) {
@@ -156,7 +150,7 @@ public class ServiceDefGenerator {
         List<Map<String, List<String>>> securityList = operation.getSecurity();
         Map<String, SecuritySchemeDefinition> securitySchemeDefinitionMap = swagger.getSecurityDefinitions();
         if (securitySchemeDefinitionMap == null || securitySchemeDefinitionMap.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
         List<SecuritySchemeDefinition> securitySchemeDefinitions = new ArrayList<>();
         for (Map<String, List<String>> security : securityList) {
@@ -199,14 +193,14 @@ public class ServiceDefGenerator {
     private List<Parameter> buildParameters(final Swagger swagger, final Operation operation) {
         List<Parameter> parameters = new ArrayList<>();
         for (com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter : operation.getParameters()) {
-            Parameter defParameter = buildParameter(swagger, parameter);
+            Parameter defParameter = buildParameter(parameter);
             parameters.add(defParameter);
         }
         buildSecurityParameters(swagger, operation, parameters);
         return parameters;
     }
 
-    private Parameter buildParameter(final Swagger swagger, final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter) {
+    private Parameter buildParameter(final com.wavemaker.tools.apidocs.tools.core.model.parameters.Parameter parameter) {
         final String fullyQualifiedName = SwaggerDocUtil.getParameterType(parameter);
         final String name = (parameter.getName() == null) ? parameter.getIn().toLowerCase() : parameter.getName();
         final String contentType = ((AbstractParameter) parameter).getContentType();
@@ -224,18 +218,18 @@ public class ServiceDefGenerator {
             SecuritySchemeDefinition securitySchemeDefinition = swagger.getSecurityDefinitions().get("WM_Rest_Service_Authorization");
             final List<Map<String, List<String>>> operationSecurity = operation.getSecurity();
             if (securitySchemeDefinition != null && securitySchemeDefinition.getType().equals("basic")) {
-                if (operationSecurity != null && operationSecurity.size() > 0) {
-                    if (operationSecurity.get(0).get("WM_Rest_Service_Authorization") != null) {
-                        final Parameter userNameParameter = new Parameter();
-                        userNameParameter.setName("wm_auth_username");
-                        userNameParameter.setParameterType("auth");
-                        parameters.add(userNameParameter);
+                if (operationSecurity != null && !operationSecurity.isEmpty() &&
+                        (operationSecurity.get(0).get("WM_Rest_Service_Authorization") != null)) {
+                    final Parameter userNameParameter = new Parameter();
+                    userNameParameter.setName("wm_auth_username");
+                    userNameParameter.setParameterType("auth");
+                    parameters.add(userNameParameter);
 
-                        final Parameter passwordParameter = new Parameter();
-                        passwordParameter.setName("wm_auth_password");
-                        passwordParameter.setParameterType("auth");
-                        parameters.add(passwordParameter);
-                    }
+                    final Parameter passwordParameter = new Parameter();
+                    passwordParameter.setName("wm_auth_password");
+                    passwordParameter.setParameterType("auth");
+                    parameters.add(passwordParameter);
+
                 }
 
             }
