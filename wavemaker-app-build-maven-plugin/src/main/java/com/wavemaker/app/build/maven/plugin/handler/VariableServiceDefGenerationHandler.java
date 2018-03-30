@@ -24,11 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.wavemaker.app.build.exception.ServiceDefGenerationException;
 import com.wavemaker.app.build.servicedef.ServiceDefGenerator;
 import com.wavemaker.commons.WMRuntimeException;
@@ -124,29 +123,29 @@ public class VariableServiceDefGenerationHandler implements AppBuildHandler {
         for (final File file : files) {
             try {
                 generateServiceDefs(file);
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 logger.warn("Failed to build service definitions for variable json file {}", file.getName(), e);
             }
         }
     }
 
-    private void generateServiceDefs(File file) throws JSONException {
+    private void generateServiceDefs(File file) {
         String s = file.getContent().asString();
         if (StringUtils.isBlank(s)) {
             return;
         }
-        JSONObject jsonObject = new JSONObject(s);
-        Iterator keys = jsonObject.keys();
-        while (keys.hasNext()) {
-            String variableName = (String) keys.next();
-            JSONObject o = (JSONObject) jsonObject.get(variableName);
-            if (o.has("category")) {
-                String category = o.getString("category");
+        JsonNode jsonNode = JSONUtils.readTree(s);
+        Iterator<String> fieldNames = jsonNode.fieldNames();
+        while (fieldNames.hasNext()) {
+            String variableName = fieldNames.next();
+            JsonNode variableNode = jsonNode.get(variableName);
+            if (variableNode.has("category")) {
+                String category = variableNode.get("category").asText();
                 if (!(WM_SERVICE_VARIABLE.equals(category) || WEBSOCKET_VARIABLE.equals(category))) {
                     continue;
                 }
-                String serviceId = o.optString("service");
-                String operationId = o.optString("operationId");
+                String serviceId = (variableNode.hasNonNull("service")) ?variableNode.get("service").asText() : null;
+                String operationId = (variableNode.hasNonNull("operationId")) ?variableNode.get("operationId").asText() : null;
                 if (StringUtils.isBlank(operationId)) {
                     logger.warn("Service variable with name {} does not have operationId property", variableName);
                     continue;

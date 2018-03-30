@@ -10,9 +10,11 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.wavemaker.commons.WMRuntimeException;
 import com.wavemaker.commons.io.File;
 import com.wavemaker.commons.io.Folder;
@@ -24,6 +26,7 @@ import com.wavemaker.commons.util.PropertiesFileUtils;
  */
 public class WMPropertiesFileGenerator {
 
+    private static final Logger logger = LoggerFactory.getLogger(WMPropertiesFileGenerator.class);
 
     private static final String SECURITY_SERVICE_DESIGNTIME_DIR = "/services/securityService/designtime/";
     private static final String GENERAL_OPTIONS_FILE = "general-options.json";
@@ -83,17 +86,18 @@ public class WMPropertiesFileGenerator {
 
 
     private boolean isSecurityEnabled(Folder rootFolder) {
-        try {
-            Folder securityService = rootFolder.getFolder(SECURITY_SERVICE_DESIGNTIME_DIR);
-            if (securityService.exists()) {
-                File generalOptionsFile = securityService.getFile(GENERAL_OPTIONS_FILE);
-                if (generalOptionsFile.exists()) {
-                    JSONObject jsonObject = new JSONObject(generalOptionsFile.getContent().asString());
-                    return jsonObject.getBoolean("enforceSecurity");
+        Folder securityService = rootFolder.getFolder(SECURITY_SERVICE_DESIGNTIME_DIR);
+        if (securityService.exists()) {
+            File generalOptionsFile = securityService.getFile(GENERAL_OPTIONS_FILE);
+            if (generalOptionsFile.exists()) {
+                JsonNode jsonNode = JSONUtils.readTree(generalOptionsFile.getContent().asInputStream());
+                if (jsonNode.has("enforceSecurity")) {
+                    BooleanNode enforceSecurityNode = (BooleanNode) jsonNode.get("enforceSecurity");
+                    return enforceSecurityNode.asBoolean();
+                } else {
+                    logger.warn("Missing field enforeSecurity in the file {}", GENERAL_OPTIONS_FILE);
                 }
             }
-        } catch (JSONException e) {
-            throw new WMRuntimeException("Failed to read general-options json file", e);
         }
         return false;
     }
